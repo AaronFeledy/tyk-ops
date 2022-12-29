@@ -1,4 +1,4 @@
-module github.com/TykTechnologies/tyk-sync
+module github.com/AaronFeledy/tyk-ops
 
 go 1.16
 

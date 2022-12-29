@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/TykTechnologies/tyk-sync/cmd"
+	"github.com/AaronFeledy/tyk-ops/cmd"
 	"os"
 )
 

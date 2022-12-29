@@ -5,7 +5,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/TykTechnologies/tyk/apidef"
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"

@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/ongoingio/urljoin"
 	"io"
 	"io/ioutil"

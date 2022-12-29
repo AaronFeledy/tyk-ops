@@ -3,8 +3,8 @@ package cli_publisher
 import (
 	"fmt"
 
-	"github.com/TykTechnologies/tyk-sync/clients/dashboard"
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/dashboard"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 )
 
 type DashboardPublisher struct {

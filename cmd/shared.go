@@ -10,10 +10,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/TykTechnologies/tyk-sync/cli-publisher"
-	"github.com/TykTechnologies/tyk-sync/clients/examplesrepo"
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
-	"github.com/TykTechnologies/tyk-sync/tyk-vcs"
+	"github.com/AaronFeledy/tyk-ops/cli-publisher"
+	"github.com/AaronFeledy/tyk-ops/clients/examplesrepo"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/tyk-vcs"
 )
 
 var isGateway bool

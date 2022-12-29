@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	tyk_swagger "github.com/AaronFeledy/tyk-ops/tyk-swagger"
 	"github.com/TykTechnologies/tyk/apidef"
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/src-d/go-billy.v4/memfs"
@@ -15,9 +17,6 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
-
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
-	tyk_swagger "github.com/TykTechnologies/tyk-sync/tyk-swagger"
 )
 
 type Getter interface {

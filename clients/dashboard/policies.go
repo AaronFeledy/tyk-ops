@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 )
 
 type PoliciesData struct {

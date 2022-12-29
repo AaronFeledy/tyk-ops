@@ -1,6 +1,6 @@
-# Tyk Sync
+# Tyk Ops
 
-![Unstable packages](https://github.com/TykTechnologies/tyk-sync/workflows/Unstable%20packages/badge.svg)
+![Unstable packages](https://github.com/AaronFeledy/tyk-ops/workflows/Unstable%20packages/badge.svg)
 
 ## What is it?
 
@@ -44,7 +44,7 @@ dependent tokens continue to have access to your services.
 Currently the application is available via Go, Docker and in packagecloud, so to install via Go you must have Go installed and run:
 
  ```
- go get -u github.com/TykTechnologies/tyk-sync
+ go get -u github.com/AaronFeledy/tyk-ops
  ```
 This should make the `tyk-sync` command available to your console.
 

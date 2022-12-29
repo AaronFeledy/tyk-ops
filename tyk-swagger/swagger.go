@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/TykTechnologies/tyk/apidef"
 	"github.com/ongoingio/urljoin"
 	uuid "github.com/satori/go.uuid"

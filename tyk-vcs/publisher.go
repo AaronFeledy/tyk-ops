@@ -1,7 +1,7 @@
 package tyk_vcs
 
 import (
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 )
 
 type Publisher interface {

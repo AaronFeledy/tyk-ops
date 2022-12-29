@@ -3,8 +3,8 @@ package cli_publisher
 import (
 	"errors"
 
-	"github.com/TykTechnologies/tyk-sync/clients/gateway"
-	"github.com/TykTechnologies/tyk-sync/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/clients/gateway"
+	"github.com/AaronFeledy/tyk-ops/clients/objects"
 )
 
 type GatewayPublisher struct {
