@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/AaronFeledy/tyk-ops/cmd"
 	"os"
 )
 
 func main() {
+	cmd.RootCmd.SetOut(os.Stdout)
 	if err := cmd.RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		cmd.RootCmd.PrintErrln(err)
 		os.Exit(1)
 	}
 }
