@@ -9,6 +9,7 @@ require (
 	github.com/ongoingio/urljoin v0.0.0-20140909071054-8d88f7c81c3c
 	github.com/satori/go.uuid v1.2.0
 	github.com/schollz/progressbar/v3 v3.12.2
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
