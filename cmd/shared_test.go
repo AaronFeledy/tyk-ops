@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/TykTechnologies/tyk-sync/clients/examplesrepo"
+	"github.com/AaronFeledy/tyk-ops/clients/examplesrepo"
 )
 
 func TestGenerateExampleDetailsString(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"github.com/AaronFeledy/tyk-ops/clients/mserv"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"net/url"
 	"os"
 	"path"
@@ -30,13 +31,16 @@ func init() {
 	pushCmd.PersistentFlags().StringP("endpoint", "e", "", "Mserv endpoint")
 	pushCmd.PersistentFlags().StringP("dashboard", "d", "", "The dashboard proxying to mserv")
 	pushCmd.PersistentFlags().BoolP("insecure-tls", "k", false, "allow insecure TLS for mserv client")
+
+	_ = viper.BindPFlag("mserv-url", pushCmd.PersistentFlags().Lookup("endpoint"))
+	_ = viper.BindPFlag("mserv-secret", pushCmd.PersistentFlags().Lookup("token"))
+
 }
 
 func pushBundle(cmd *cobra.Command, args []string) {
-	verificationError := verifyArguments(cmd)
-	if verificationError != nil {
-		cmd.PrintErr(fmt.Sprintln(verificationError))
-		os.Exit(1)
+	if Cfg.TargetEnv != nil {
+		viper.SetDefault("mserv-url", Cfg.TargetEnv.Mserv.Url)
+		viper.SetDefault("mserv-secret", Cfg.TargetEnv.Mserv.Secret)
 	}
 
 	file, err := os.Open(args[0])
@@ -46,7 +50,7 @@ func pushBundle(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	endpoint, _ := cmd.Flags().GetString("endpoint")
+	endpoint := viper.GetString("mserv-url")
 	if endpoint == "" {
 		dbUrl, _ := cmd.Flags().GetString("dashboard")
 		if dbUrl == "" {
@@ -63,19 +67,14 @@ func pushBundle(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	secret, _ := cmd.Flags().GetString("secret")
-	token, _ := cmd.Flags().GetString("token")
+	secret := viper.GetString("mserv-secret")
 
-	if secret == "" && token == "" {
-		cmd.PrintErr(fmt.Sprintln("Please set the --secret or --token flag to your mserv access token"))
+	if secret == "" {
+		cmd.PrintErr(fmt.Sprintln("Please set the --token flag to your mserv access token"))
 		os.Exit(1)
 	}
 
-	if secret != "" {
-		token = secret
-	}
-
-	client, err := mserv.NewMservClient(endpoint, token)
+	client, err := mserv.NewMservClient(endpoint, secret)
 	if err != nil {
 		cmd.PrintErr(fmt.Sprintln(err.Error()))
 		os.Exit(1)
@@ -125,5 +124,4 @@ func pushBundle(cmd *cobra.Command, args []string) {
 	cmd.Printf("%v", data.Id)
 	// Rewrite the previous line to stderr so that it is also displayed to the user.
 	cmd.PrintErr(fmt.Sprintf("\r%v%v\n", successMsg, data.Id))
-
 }
