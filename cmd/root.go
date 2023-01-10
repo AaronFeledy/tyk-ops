@@ -15,10 +15,8 @@ var (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "tykops",
-	Short: "A tool to manage Tyk environments",
-	Long: `A tool to manage syncing and deployments of Tyk Gateways and their
-           middleware bundles.`,
+	Use:  "tykops",
+	Long: "A tool to manage syncing and deployments of Tyk Gateways and their middleware bundles.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cmd.Help(); err != nil {
 			out.User.Errorln(err)
@@ -29,11 +27,19 @@ var RootCmd = &cobra.Command{
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file)")
-	RootCmd.PersistentFlags().String("target", "", "a target environment to use as defined in .tykops.yml")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file")
+	RootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
 
 	_ = viper.BindPFlag("target", RootCmd.PersistentFlags().Lookup("target"))
 	viper.SetDefault("target", "default")
+
+	// Support @ shorthand for target flag in commands (e.g. tykops @dev deploy)
+	args := os.Args
+	for i, arg := range args {
+		if arg[:1] == "@" {
+			args[i] = "--target=" + arg[1:]
+		}
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
