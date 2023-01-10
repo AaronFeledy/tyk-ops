@@ -20,7 +20,9 @@ var RootCmd = &cobra.Command{
 	Long: `A tool to manage syncing and deployments of Tyk Gateways and their
            middleware bundles.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+		if err := cmd.Help(); err != nil {
+			out.User.Errorln(err)
+		}
 	},
 }
 
