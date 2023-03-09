@@ -1,6 +1,8 @@
 package output
 
 import (
+	"bytes"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -39,4 +41,13 @@ func init() {
 		Data.Level = log.DebugLevel
 	}
 	log.SetLevel(logLevel)
+}
+
+func PrettyString(str string) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err == nil {
+		Data.Println(prettyJSON.String())
+	} else {
+		Data.Println(str)
+	}
 }
