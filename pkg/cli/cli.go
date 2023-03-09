@@ -5,6 +5,8 @@ import (
 	"github.com/AaronFeledy/tyk-ops/cmd"
 )
 
+const VERSION = cmd.VERSION
+
 var (
 	RootCmd = cmd.RootCmd
 

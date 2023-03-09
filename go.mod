@@ -6,6 +6,7 @@ require (
 	github.com/TykTechnologies/graphql-go-tools v1.6.2-0.20221111114649-6afa7fe7190f
 	github.com/TykTechnologies/tyk v1.9.2-0.20221104074735-0a415e97ce67
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/json-iterator/go v1.1.12
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/ongoingio/urljoin v0.0.0-20140909071054-8d88f7c81c3c
