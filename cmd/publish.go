@@ -40,4 +40,5 @@ func init() {
 	publishCmd.Flags().Bool("test", false, "Use test publisher, output results to stdio")
 	publishCmd.Flags().StringSlice("policies", []string{}, "Specific Policies ids to publish")
 	publishCmd.Flags().StringSlice("apis", []string{}, "Specific Apis ids to publish")
+	publishCmd.Flags().BoolP("skip-existing", "n", false, "Skip creating APIs if they already exist")
 }

@@ -11,6 +11,11 @@ type DashboardPublisher struct {
 	Secret      string
 	Hostname    string
 	OrgOverride string
+	// Additional options to pass to the dashboard client
+	ClientOptions struct {
+		// Skip creating APIs if they already exist
+		SkipExisting bool
+	}
 }
 
 func (p *DashboardPublisher) enforceOrgID(apiDefs *[]objects.DBApiDefinition) {
@@ -35,6 +40,7 @@ func (p *DashboardPublisher) enforceOrgIDForPolicies(pols *[]objects.Policy) {
 
 func (p *DashboardPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}
@@ -48,6 +54,7 @@ func (p *DashboardPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) erro
 
 func (p *DashboardPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}
@@ -61,6 +68,7 @@ func (p *DashboardPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) erro
 
 func (p *DashboardPublisher) SyncAPIs(apiDefs []objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}
@@ -94,6 +102,7 @@ func (p *DashboardPublisher) Name() string {
 
 func (p *DashboardPublisher) CreatePolicies(pols *[]objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}
@@ -107,6 +116,7 @@ func (p *DashboardPublisher) CreatePolicies(pols *[]objects.Policy) error {
 
 func (p *DashboardPublisher) UpdatePolicies(pols *[]objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}
@@ -120,6 +130,7 @@ func (p *DashboardPublisher) UpdatePolicies(pols *[]objects.Policy) error {
 
 func (p *DashboardPublisher) SyncPolicies(pols []objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
 	}

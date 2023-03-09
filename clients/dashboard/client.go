@@ -16,6 +16,8 @@ type Client struct {
 	isCloud            bool
 	InsecureSkipVerify bool
 	OrgID              string
+	// Skip creating APIs if they already exist
+	SkipExisting bool
 }
 
 const (

@@ -3,6 +3,7 @@ package dashboard
 import (
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"
@@ -66,15 +67,25 @@ func (c *Client) CreatePolicies(pols *[]objects.Policy) error {
 
 	mids, ids := getPoliciesIdentifiers(&existingPols)
 
+	var existsCount int64
 	for i := range *pols {
 		pol := (*pols)[i]
 		fmt.Printf("Creating Policy %v: %v\n", i, pol.Name)
+		var existsError error
 		if thisPol, ok := mids[pol.MID.Hex()]; ok && thisPol != nil {
 			fmt.Println("Warning: Policy MID Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
 		} else if thisPol, ok := ids[pol.ID]; ok && thisPol != nil {
 			fmt.Println("Warning: Policy ID Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
+		}
+
+		if existsError != nil {
+			if c.SkipExisting {
+				existsCount++
+				continue
+			}
+			return existsError
 		}
 
 		fullPath := urljoin.Join(c.url, endpointPolicies)
@@ -113,6 +124,10 @@ func (c *Client) CreatePolicies(pols *[]objects.Policy) error {
 		ids[pol.ID] = &pol
 
 		fmt.Printf("--> Status: OK, ID:%v\n", dbResp.Meta)
+	}
+
+	if existsCount > 0 {
+		output.User.Println("%v policies already exist and were skipped", existsCount)
 	}
 
 	return nil

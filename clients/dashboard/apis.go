@@ -1,11 +1,10 @@
 package dashboard
 
 import (
-	"fmt"
-
 	"encoding/json"
-
+	"fmt"
 	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/TykTechnologies/tyk/apidef"
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"
@@ -125,22 +124,32 @@ func (c *Client) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 
 	apiids, ids, slugs, paths := getAPIsIdentifiers(&existingAPIs)
 
+	var existsCount int64
 	retainAPIIdList := make([]objects.DBApiDefinition, 0)
 	for i := range *apiDefs {
 		apiDef := (*apiDefs)[i]
 		fmt.Printf("Creating API %v: %v\n", i, apiDef.Name)
+		var existsError error
 		if thisAPI, ok := apiids[apiDef.APIID]; ok && thisAPI != nil {
 			fmt.Println("Warning: API ID Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
 		} else if thisAPI, ok := ids[apiDef.Id.Hex()]; ok && thisAPI != nil {
 			fmt.Println("Warning: Object ID Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
 		} else if thisAPI, ok := slugs[apiDef.Slug]; ok && thisAPI != nil {
 			fmt.Println("Warning: Slug Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
 		} else if thisAPI, ok := paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain]; ok && thisAPI != nil {
 			fmt.Println("Warning: Listen Path Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
+		}
+
+		if existsError != nil {
+			if c.SkipExisting {
+				existsCount++
+				continue
+			}
+			return existsError
 		}
 
 		// Create
@@ -200,6 +209,10 @@ func (c *Client) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 
 	if err := c.UpdateAPIs(&retainAPIIdList); err != nil {
 		return err
+	}
+
+	if existsCount > 0 {
+		output.User.Println("%v APIs already exist and were skipped", existsCount)
 	}
 
 	return nil

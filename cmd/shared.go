@@ -73,6 +73,7 @@ func getPublisher(cmd *cobra.Command, args []string) (tyk_vcs.Publisher, error) 
 			Hostname:    dbString,
 			OrgOverride: orgOverride,
 		}
+		newDashPublisher.ClientOptions.SkipExisting, _ = cmd.Flags().GetBool("skip-existing")
 
 		return newDashPublisher, nil
 	}
