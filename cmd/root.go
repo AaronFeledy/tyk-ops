@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -93,34 +94,26 @@ func initConfig() {
 		}
 
 		// Load the config into the global variable
+		Cfg.Environments = &ops.Environments
 		if err := viper.Unmarshal(&Cfg); err != nil {
 			out.User.Errorln(err.Error())
 			return
 		}
 		// Add shorthand for the target environment
 		if targetEnv {
-			Cfg.TargetEnv = Cfg.Environments[target]
+			Cfg.TargetEnv = ops.Environments[target]
 		}
 	}
 }
 
+// Config is the configuration for the TykOps client.
 type Config struct {
-	Environments map[string]*Environment `mapstructure:"environments"`
-	Target       string                  `mapstructure:"target"`
-	TargetEnv    *Environment            `mapstructure:"target_env,omitempty"`
-}
-
-type Environment struct {
-	Dashboard struct {
-		Url    string `mapstructure:"url"`
-		Secret string `mapstructure:"secret"`
-	} `mapstructure:"dashboard"`
-	Gateway struct {
-		Url    string `mapstructure:"url"`
-		Secret string `mapstructure:"secret"`
-	} `mapstructure:"gateway"`
-	Mserv struct {
-		Url    string `mapstructure:"url"`
-		Secret string `mapstructure:"secret"`
-	} `mapstructure:"mserv"`
+	// Environments is a map of available environments keyed by name.
+	Environments *map[string]*ops.Environment `mapstructure:"environments"`
+	// EnvironmentDefault is a map of available environments keyed by name.
+	EnvironmentDefault string `mapstructure:"environment_default,omitempty"`
+	// Target is the name of the target environment.
+	Target string `mapstructure:"target"`
+	// TargetEnv is the target environment to act on.
+	TargetEnv *ops.Environment `mapstructure:"-"`
 }

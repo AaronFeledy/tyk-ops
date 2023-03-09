@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -27,6 +28,10 @@ var updateCmd = &cobra.Command{
 	Long: `Update will attempt to identify matching APIs or Policies in the target, and update those APIs
 	It will not create new ones, to do this use publish or sync.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if Cfg.TargetEnv != nil {
+			viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
+			viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+		}
 		verificationError := verifyArguments(cmd)
 		if verificationError != nil {
 			fmt.Println(verificationError)

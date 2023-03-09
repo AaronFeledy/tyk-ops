@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/AaronFeledy/tyk-ops/cmd"
+	"github.com/AaronFeledy/tyk-ops/pkg/cli"
 	"os"
 )
 
 func main() {
-	cmd.RootCmd.SetOut(os.Stdout)
-	if err := cmd.RootCmd.Execute(); err != nil {
-		cmd.RootCmd.PrintErrln(err)
+	cli.RootCmd.SetOut(os.Stdout)
+	if err := cli.RootCmd.Execute(); err != nil {
+		cli.RootCmd.PrintErrln(err)
 		os.Exit(1)
 	}
 }

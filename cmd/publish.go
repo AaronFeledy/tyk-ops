@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -13,6 +14,10 @@ var publishCmd = &cobra.Command{
 	Long: `Publish API definitions from a Git repo to a gateway or dashboard, this
 	will not update existing APIs, and if it detects a collision, will stop.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if Cfg.TargetEnv != nil {
+			viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
+			viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+		}
 		verificationError := verifyArguments(cmd)
 		if verificationError != nil {
 			fmt.Println(verificationError)
