@@ -32,7 +32,6 @@ func init() {
 	RootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
 
 	_ = viper.BindPFlag("target", RootCmd.PersistentFlags().Lookup("target"))
-	viper.SetDefault("target", "default")
 
 	// Support @ shorthand for target flag in commands (e.g. tykops @dev deploy)
 	args := os.Args
@@ -81,16 +80,21 @@ func initConfig() {
 		// Check for target environment in config
 		var targetEnv bool
 		target := viper.GetString("target")
+
+		// A subcommand will set target to "default" when it wants to use the default environment from the config file
+		if target == "default" {
+			if viper.IsSet("environment_default") {
+				target = viper.GetString("environment_default")
+			}
+		}
+
+		// Don't continue if the target environment is not found in the config
 		if viper.IsSet("environments." + target) {
 			out.User.Debugln("Using target environment '" + target + "'")
 			targetEnv = true
 		} else {
-			if target == "default" {
-				target = ""
-			} else {
-				out.User.Errorln("Target environment '" + target + "' not found in " + viper.ConfigFileUsed())
-				os.Exit(1)
-			}
+			out.User.Errorln("Target environment '" + target + "' not found in " + viper.ConfigFileUsed())
+			os.Exit(1)
 		}
 
 		// Load the config into the global variable
