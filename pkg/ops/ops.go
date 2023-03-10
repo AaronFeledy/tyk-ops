@@ -11,9 +11,9 @@ type Server struct {
 	// Url is the URL of the server.
 	Url string `mapstructure:"url" json:"url"`
 	// Secret is the secret used to authenticate with the server.
-	Secret string `mapstructure:"secret" json:"secret"`
+	Secret string `mapstructure:"secret" json:"-"`
 	// AllowInsecure is a flag that indicates whether or not to allow insecure connections.
-	AllowInsecure bool `mapstructure:"insecure" json:"insecure"`
+	AllowInsecure bool `mapstructure:"insecure" json:"insecure,omitempty"`
 }
 
 // Environment is the configuration for a Tyk environment.

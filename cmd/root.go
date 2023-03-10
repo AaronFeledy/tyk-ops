@@ -119,5 +119,5 @@ type Config struct {
 	// Target is the name of the target environment.
 	Target string `mapstructure:"target"`
 	// TargetEnv is the target environment to act on.
-	TargetEnv *ops.Environment `mapstructure:"-"`
+	TargetEnv *ops.Environment `mapstructure:"-"` // This is not a config value, it's a convenience for the target environment
 }

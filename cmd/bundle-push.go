@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AaronFeledy/tyk-ops/clients/mserv"
+	out "github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -118,10 +119,6 @@ func pushBundle(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// Print only the bundle ID to stdout so it can be piped to other commands without including the surrounding text.
 	successMsg := "Bundle successfully pushed to mserv with ID: "
-	cmd.PrintErr(fmt.Sprintf("%v", successMsg))
-	cmd.Printf("%v", data.Id)
-	// Rewrite the previous line to stderr so that it is also displayed to the user.
-	cmd.PrintErr(fmt.Sprintf("\r%v%v\n", successMsg, data.Id))
+	out.DataWithFlair(data.Id).Pre(successMsg).Println()
 }
