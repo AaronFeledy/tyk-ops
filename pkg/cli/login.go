@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	"github.com/containerd/console"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/sys/unix"
 	"os"
 	"os/exec"
 	"runtime"
@@ -34,6 +34,8 @@ func loginOpt() {
 	loginCmd.Flags().StringP("org", "o", "", "The ID of the organization to log in to")
 	loginCmd.Flags().StringP("user", "u", "", "The email address of the user to log in as")
 	loginCmd.Flags().StringP("secret", "s", "", "The dashboard admin auth token to use")
+	loginCmd.Flags().BoolP("no-browser", "n", false, "Don't open the login link in a browser")
+	loginCmd.Flags().BoolP("interactive", "i", false, "Prompt for details. This is the default in TTY mode.")
 
 	// It's safe to use the default environment as the target for this command.
 	viper.SetDefault("target", "default")
@@ -96,29 +98,23 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 
 	// We only want the interactive bits to happen when we are in a terminal.
 	// Scripts should just dump the link and move on.
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
+	interactive, _ := cmd.Flags().GetBool("interactive")
+	if !interactive && !isatty.IsTerminal(os.Stdout.Fd()) {
 		out.User.Printf("\n")
 		return
 	} else {
-		const ioctlReadTermios = unix.TCGETS
-		const ioctlWriteTermios = unix.TCSETS
-
 		// Block input from echoing to the terminal during the countdown
-		fd := int(os.Stdin.Fd())
-		termios, err := unix.IoctlGetTermios(fd, ioctlReadTermios)
+		current := console.Current()
+		defer func(current console.Console) {
+			err := current.Reset()
+			if err != nil {
+				out.User.Debug(err.Error())
+			}
+		}(current)
+		err := current.DisableEcho()
 		if err != nil {
-			out.User.Fatal(err)
+			out.User.Debug(err.Error())
 		}
-		newState := *termios
-		newState.Lflag &^= unix.ECHO
-		newState.Lflag |= unix.ICANON | unix.ISIG
-		newState.Iflag |= unix.ICRNL
-		if err := unix.IoctlSetTermios(fd, ioctlWriteTermios, &newState); err != nil {
-			out.User.Fatal(err)
-		}
-
-		// Restore terminal echoing after this function completes
-		defer unix.IoctlSetTermios(fd, ioctlWriteTermios, termios)
 
 		// Capture keystrokes so we can exit on "enter"
 		reader := bufio.NewReader(os.Stdin)
@@ -126,17 +122,21 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 		go readKey(reader, input)
 
 		// Add a countdown to link expiry
-		for i := 58; i >= 0; i-- {
+		for i := 59; i >= 0; i-- {
+			var expires string
+			expires = color.GreenString("[Expires in %02ds]", i)
+			out.User.Printf("\r%s %s", loginLink, expires)
 			if i == 0 {
 				out.User.Printf("\r\033[9m%s\033[0m %s\n", loginLink, color.HiRedString("[   EXPIRED    ]"))
 				return
 			}
 			select {
-			case <-openLink(loginLink): // Try to open the link in the browser automatically
-				out.User.Printf("\r%s                 \n", loginLink)
-				return // We're done if the link was opened
+			case opened := <-openLink(cmd, loginLink): // Try to open the link in the browser automatically
+				if opened {
+					out.User.Printf("\r%s                 \n", loginLink)
+					return // We're done if the link was opened
+				}
 			case <-time.After(time.Second): // Update every second
-				var expires string
 				switch {
 				case i > 30:
 					expires = color.GreenString("[Expires in %02ds]", i)
@@ -164,28 +164,32 @@ func readKey(reader *bufio.Reader, input chan rune) {
 	input <- char
 }
 
-func openLink(link string) chan bool {
+func openLink(cmd *cobra.Command, link string) chan bool {
+	c := make(chan bool, 1)
 	// Only try this once
 	if loginTriedBrowser {
 		return nil
 	}
 	loginTriedBrowser = true
 
-	c := make(chan bool, 1)
-	var cmd *exec.Cmd
+	// User can specify not to open the link in the browser
+	if noBrowser, _ := cmd.Flags().GetBool("no-browser"); noBrowser {
+		return nil
+	}
+	var execCmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.Command("cmd", "/C", "start", link)
+		execCmd = exec.Command("cmd", "/C", "start", link)
 	case "darwin":
-		cmd = exec.Command("open", link)
+		execCmd = exec.Command("open", link)
 	default: // assume Linux or other Unix-like OS
-		cmd = exec.Command("xdg-open", link)
+		execCmd = exec.Command("xdg-open", link)
 	}
 	go func() {
-		err := cmd.Start()
+		err := execCmd.Start()
 		if err != nil {
 			out.User.Debug("error opening link: ", err)
-			c <- false
+			return
 		}
 		c <- true
 	}()
