@@ -2,16 +2,13 @@
 package cli
 
 import (
-	"github.com/AaronFeledy/tyk-ops/cmd"
 	"github.com/fatih/color"
 )
 
-const VERSION = cmd.VERSION
+const VERSION = "0.0.1"
 
 var (
-	RootCmd = cmd.RootCmd
-
-	Cfg = &cmd.Cfg
-
+	Cfg        Config
+	cfgFile    string
 	labelColor = color.New(color.FgMagenta).SprintFunc()
 )

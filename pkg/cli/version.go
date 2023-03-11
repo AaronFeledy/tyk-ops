@@ -1,12 +1,10 @@
-package cmd
+package cli
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 )
-
-const VERSION = "0.0.1"
 
 func init() {
 	RootCmd.AddCommand(versionCmd)

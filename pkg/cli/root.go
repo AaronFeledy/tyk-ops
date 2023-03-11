@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
@@ -8,11 +8,6 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path"
-)
-
-var (
-	Cfg     Config
-	cfgFile string
 )
 
 var RootCmd = &cobra.Command{
