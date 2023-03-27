@@ -6,6 +6,7 @@ require (
 	github.com/TykTechnologies/graphql-go-tools v1.6.2-0.20230214130715-aa076c16772f
 	github.com/TykTechnologies/tyk v1.9.2-0.20230228090416-dfc3f76938c8
 	github.com/containerd/console v1.0.3
+	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/fatih/color v1.14.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/json-iterator/go v1.1.12

@@ -1,10 +1,11 @@
 package cli
 
 import (
-	"bufio"
+	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/containerd/console"
+	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/mattn/go-isatty"
@@ -116,54 +117,130 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 			out.User.Debug(err.Error())
 		}
 
-		// Capture keystrokes so we can exit on "enter"
-		reader := bufio.NewReader(os.Stdin)
+		// Capture keystrokes so we can exit countdown on key press
 		input := make(chan rune, 1)
-		go readKey(reader, input)
+		go readKey(input)
 
+		wrapCount := 0
+		trailingSpace := 0
+		padding := " "
+		cliClearLine := "\033[2K\r"
 		// Add a countdown to link expiry
+	CountDown:
 		for i := 59; i >= 0; i-- {
-			var expires string
-			expires = color.GreenString("[Expires in %02ds]", i)
-			out.User.Printf("\r%s %s", loginLink, expires)
-			if i == 0 {
-				out.User.Printf("\r\033[9m%s\033[0m %s\n", loginLink, color.HiRedString("[   EXPIRED    ]"))
-				return
+			expires := fmt.Sprintf("[Expires in %02ds]", i)
+
+			// First run of the loop, print the link
+			if i == 59 {
+				// Determine whether the link will wrap to the next line
+				termSize, err := current.Size()
+				if err != nil {
+					out.User.Debug(err.Error())
+				}
+				wrapCount = len(loginLink) / int(termSize.Width)
+
+				// Clear the previous output for w := 0; w < wrapCount; w++ {
+					out.User.Printf("%s\033[1A", cliClearLine)
+				}
+
+				// Print the link
+				out.User.Printf("%s%s", cliClearLine, loginLink)
+
+				// If the expires string is longer than the terminal width, print a newline so it doesn't wrap
+				trailingSpace = int(termSize.Width) - (len(loginLink) % int(termSize.Width))
+				if len(expires) >= trailingSpace {
+					out.User.Printf("\n")
+					padding = ""
+					wrapCount++
+				}
 			}
+			if i == 0 {
+				expires = fmt.Sprintf("[ LINK EXPIRED ]")
+				out.User.Printf("%s", cliClearLine)
+				// Clear the number of lines equal to wrapCount
+				for w := 0; w <= wrapCount; w++ {
+					out.User.Printf("\033[1A%s", cliClearLine)
+				}
+
+				// Print the expired link in strikethrough
+				out.User.Printf("\033[9m%s\033[0m", loginLink)
+
+				if len(expires) >= trailingSpace {
+					out.User.Printf("\n")
+				}
+			}
+			expires = padding + expires
+
+			var expiresColored string
+			switch {
+			case i == 0:
+				expiresColored = color.HiRedString(expires)
+			case i > 30:
+				expiresColored = color.GreenString(expires)
+			case i > 10:
+				expiresColored = color.YellowString(expires)
+			default:
+				expiresColored = color.RedString(expires)
+			}
+			out.User.Printf("%s", expiresColored)
+
 			select {
+			case <-time.After(time.Second * time.Duration(i*2000)): // Immediately break when i==0
+				out.User.Printf("\n")
+				break CountDown
 			case opened := <-openLink(cmd, loginLink): // Try to open the link in the browser automatically
 				if opened {
-					out.User.Printf("\r%s                 \n", loginLink)
-					return // We're done if the link was opened
+					// Back up the cursor to the beginning of expiry countdown
+					out.User.Printf("\033[%dD", len(expires))
+					// Clear everything after the cursor
+					out.User.Printf("\033[J")
+					// Add a final line break if we don't already have one
+					if len(expires) < trailingSpace {
+						out.User.Printf("\n")
+					}
+					break CountDown
 				}
 			case <-time.After(time.Second): // Update every second
-				switch {
-				case i > 30:
-					expires = color.GreenString("[Expires in %02ds]", i)
-				case i > 10:
-					expires = color.YellowString("[Expires in %02ds]", i)
-				default:
-					expires = color.RedString("[Expires in %02ds]", i)
+				// Back up the cursor to the beginning of expiry countdown
+				out.User.Printf("\033[%dD", len(expires))
+				continue
+			case <-input: // End countdown when a key is pressed
+				// Back up the cursor to the beginning of expiry countdown
+				out.User.Printf("\033[%dD", len(expires))
+				// Clear everything after the cursor
+				out.User.Printf("\033[J")
+				// Add a final line break if we don't already have one
+				if len(expires) < trailingSpace {
+					out.User.Printf("\n")
 				}
-				out.User.Printf("\r%s %s", loginLink, expires)
-				color.Set(color.Reset)
-			case <-input: // End countdown when enter is pressed
-				out.User.Printf("\r%s                 \n", loginLink)
-				return
+				break CountDown
 			}
 		}
 	}
 }
 
-// readKey opens a channel that sends the enter key when it is pressed
-func readKey(reader *bufio.Reader, input chan rune) {
-	char, _, err := reader.ReadRune()
+// readKey opens a channel that sends any key when it is pressed
+func readKey(input chan rune) {
+	defer close(input)
+	err := keyboard.Open()
 	if err != nil {
 		out.User.Fatal(err)
 	}
-	input <- char
+	defer keyboard.Close()
+
+	for {
+		char, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			out.User.Fatal(err)
+		}
+		input <- char
+	}
 }
 
+// openLink opens the specified link in the default web browser of the user's operating system,
+// unless the "no-browser" flag is set to true, and returns a channel that receives a boolean value
+// when the browser is opened or an error occurs. Only one attempt to open the link is made, and subsequent
+// calls to this function will return a nil channel.
 func openLink(cmd *cobra.Command, link string) chan bool {
 	c := make(chan bool, 1)
 	// Only try this once
@@ -171,6 +248,11 @@ func openLink(cmd *cobra.Command, link string) chan bool {
 		return nil
 	}
 	loginTriedBrowser = true
+
+	// Don't open a link if this is an ssh session
+	if os.Getenv("SSH_CLIENT") != "" || os.Getenv("SSH_TTY") != "" {
+		return nil
+	}
 
 	// User can specify not to open the link in the browser
 	if noBrowser, _ := cmd.Flags().GetBool("no-browser"); noBrowser {
