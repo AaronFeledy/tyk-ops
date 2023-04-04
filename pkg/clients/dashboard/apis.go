@@ -3,7 +3,7 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/TykTechnologies/tyk/apidef"
 	"github.com/levigross/grequests"

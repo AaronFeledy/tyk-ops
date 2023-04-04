@@ -3,9 +3,9 @@ package dashboard
 import (
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"strings"
 
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"
 )

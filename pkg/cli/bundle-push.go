@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/AaronFeledy/tyk-ops/clients/mserv"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/mserv"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"

@@ -139,7 +139,8 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 				}
 				wrapCount = len(loginLink) / int(termSize.Width)
 
-				// Clear the previous output for w := 0; w < wrapCount; w++ {
+				// Clear the previous output
+				for w := 0; w < wrapCount; w++ {
 					out.User.Printf("%s\033[1A", cliClearLine)
 				}
 

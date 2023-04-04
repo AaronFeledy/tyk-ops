@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	tyk_swagger "github.com/AaronFeledy/tyk-ops/tyk-swagger"
 	"github.com/TykTechnologies/tyk/apidef"
 	"gopkg.in/src-d/go-billy.v4"

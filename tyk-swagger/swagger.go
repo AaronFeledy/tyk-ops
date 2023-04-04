@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/TykTechnologies/tyk/apidef"
 	"github.com/ongoingio/urljoin"
 	uuid "github.com/satori/go.uuid"

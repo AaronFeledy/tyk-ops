@@ -1,11 +1,10 @@
-package gateway
+package dashboard
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"github.com/ongoingio/urljoin"
 	"io"
 	"io/ioutil"
@@ -32,12 +31,9 @@ func (c *Client) CreateCertificate(cert []byte) (string, error) {
 
 	req, err := http.NewRequest("POST", fullPath, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("X-Tyk-Authorization", c.secret)
+	req.Header.Set("Authorization", c.secret)
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipVerify},
-	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 
 	rBody, _ := ioutil.ReadAll(resp.Body)

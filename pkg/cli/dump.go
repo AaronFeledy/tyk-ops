@@ -2,6 +2,8 @@ package cli
 
 import (
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/dashboard"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -10,8 +12,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/AaronFeledy/tyk-ops/clients/dashboard"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	tyk_vcs "github.com/AaronFeledy/tyk-ops/tyk-vcs"
 	"github.com/spf13/cobra"
 )

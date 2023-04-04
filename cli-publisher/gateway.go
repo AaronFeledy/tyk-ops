@@ -2,9 +2,8 @@ package cli_publisher
 
 import (
 	"errors"
-
-	"github.com/AaronFeledy/tyk-ops/clients/gateway"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/gateway"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 )
 
 type GatewayPublisher struct {

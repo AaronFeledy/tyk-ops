@@ -2,9 +2,8 @@ package cli_publisher
 
 import (
 	"fmt"
-
-	"github.com/AaronFeledy/tyk-ops/clients/dashboard"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/dashboard"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 )
 
 type DashboardPublisher struct {

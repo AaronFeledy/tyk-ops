@@ -3,14 +3,13 @@ package dashboard
 import (
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"github.com/AaronFeledy/tyk-ops/pkg/output"
 
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/mgo.v2/bson"
-
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 )
 
 type PoliciesData struct {

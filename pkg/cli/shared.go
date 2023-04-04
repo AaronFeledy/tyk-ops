@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/examplesrepo"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -11,8 +13,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/AaronFeledy/tyk-ops/cli-publisher"
-	"github.com/AaronFeledy/tyk-ops/clients/examplesrepo"
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/AaronFeledy/tyk-ops/tyk-vcs"
 )
 

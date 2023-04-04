@@ -1,11 +1,10 @@
 package cli
 
 import (
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/examplesrepo"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/AaronFeledy/tyk-ops/clients/examplesrepo"
 )
 
 func TestGenerateExampleDetailsString(t *testing.T) {

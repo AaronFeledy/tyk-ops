@@ -3,10 +3,10 @@ package gateway
 import (
 	"errors"
 	"fmt"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 
 	"encoding/json"
 
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
 	"github.com/levigross/grequests"
 	"github.com/ongoingio/urljoin"
 	uuid "github.com/satori/go.uuid"

@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"github.com/AaronFeledy/tyk-ops/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
 )
 
 type APIManagementClient interface {
