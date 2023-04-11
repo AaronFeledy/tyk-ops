@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path"
+	"strings"
 )
 
 var RootCmd = &cobra.Command{
@@ -32,7 +33,30 @@ func init() {
 	args := os.Args
 	for i, arg := range args {
 		if arg[:1] == "@" {
-			args[i] = "--target=" + arg[1:]
+			segments := strings.Split(arg[1:], ".")
+			switch len(segments) {
+			case 2:
+				// One segment after the first dot is the server type
+				viper.Set("target-server.type", segments[1])
+				args[i] = "--target=" + segments[0]
+			case 3:
+				// Two segments after the first dot is the server type and name
+				viper.Set("target-server.name", segments[2])
+				viper.Set("target-server.type", segments[1])
+				args[i] = "--target=" + segments[0]
+			case 4:
+				// Three segments after the first dot
+				targetServer := arg[strings.Index(arg, ".")+1:]
+				viper.Set("target-server.type", strings.Split(targetServer, ".")[0])
+				if len(strings.Split(targetServer, ".")) > 1 {
+					viper.Set("target-server.name", strings.Join(strings.Split(targetServer, ".")[1:], "."))
+				}
+				arg = arg[:strings.Index(arg, ".")]
+				args[i] = "--target=" + arg[1:] + ":" + strings.Split(arg, ".")[3]
+			default:
+				// Target is an environment name
+				args[i] = "--target=" + arg[1:]
+			}
 		}
 	}
 }
