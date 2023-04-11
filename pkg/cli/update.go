@@ -29,8 +29,15 @@ var updateCmd = &cobra.Command{
 	It will not create new ones, to do this use publish or sync.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if Cfg.TargetEnv != nil {
-			viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
-			viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+			serverType := viper.GetString("target-server.type")
+			if serverType == "gateway" {
+				viper.SetDefault("gateway", Cfg.TargetEnv.Gateway.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Gateway.Secret)
+			} else {
+				// Default to dashboard
+				viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+			}
 		}
 		verificationError := verifyArguments(cmd)
 		if verificationError != nil {

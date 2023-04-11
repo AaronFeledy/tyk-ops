@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -15,6 +16,17 @@ var syncCmd = &cobra.Command{
 	Sync will delete any objects in the dashboard or gateway that it cannot find in the github repo,
 	update those that it can find and create those that are missing.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if Cfg.TargetEnv != nil {
+			serverType := viper.GetString("target-server.type")
+			if serverType == "gateway" {
+				viper.SetDefault("gateway", Cfg.TargetEnv.Gateway.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Gateway.Secret)
+			} else {
+				// Default to dashboard
+				viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+			}
+		}
 		verificationError := verifyArguments(cmd)
 		if verificationError != nil {
 			fmt.Println(verificationError)

@@ -15,8 +15,15 @@ var publishCmd = &cobra.Command{
 	will not update existing APIs, and if it detects a collision, will stop.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if Cfg.TargetEnv != nil {
-			viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
-			viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+			serverType := viper.GetString("target-server.type")
+			if serverType == "gateway" {
+				viper.SetDefault("gateway", Cfg.TargetEnv.Gateway.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Gateway.Secret)
+			} else {
+				// Default to dashboard
+				viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
+				viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+			}
 		}
 		verificationError := verifyArguments(cmd)
 		if verificationError != nil {
