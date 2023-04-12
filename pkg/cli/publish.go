@@ -24,7 +24,7 @@ var publishCmd = &cobra.Command{
 				secret = Cfg.TargetEnv.Gateway.Secret
 				urlFlag = "gateway"
 			}
-			if val, _ := cmd.Flags().GetString("gateway"); val == "" {
+			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {
 				cmd.Flags().Lookup(urlFlag).Value.Set(url)
 			}
 			if val, _ := cmd.Flags().GetString("secret"); val == "" {

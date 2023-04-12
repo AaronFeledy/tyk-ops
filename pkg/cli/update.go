@@ -31,13 +31,15 @@ var updateCmd = &cobra.Command{
 		if Cfg.TargetEnv != nil {
 			url := Cfg.TargetEnv.Dashboard.Url
 			secret := Cfg.TargetEnv.Dashboard.Secret
+			urlFlag := "dashboard"
 			serverType := viper.GetString("target-server.type")
 			if serverType == "gateway" {
 				url = Cfg.TargetEnv.Gateway.Url
 				secret = Cfg.TargetEnv.Gateway.Secret
+				urlFlag = "gateway"
 			}
-			if val, _ := cmd.Flags().GetString("gateway"); val == "" {
-				cmd.Flags().Lookup("gateway").Value.Set(url)
+			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {
+				cmd.Flags().Lookup(urlFlag).Value.Set(url)
 			}
 			if val, _ := cmd.Flags().GetString("secret"); val == "" {
 				cmd.Flags().Lookup("secret").Value.Set(secret)
