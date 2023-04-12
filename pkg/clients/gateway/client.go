@@ -13,8 +13,10 @@ import (
 )
 
 type Client struct {
-	url                string
-	secret             string
+	url    string
+	secret string
+	// InsecureSkipVerify is a flag that specifies if we should validate the
+	// server's TLS certificate.
 	InsecureSkipVerify bool
 }
 

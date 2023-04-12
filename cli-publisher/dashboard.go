@@ -12,6 +12,9 @@ type DashboardPublisher struct {
 	OrgOverride string
 	// Additional options to pass to the dashboard client
 	ClientOptions struct {
+		// InsecureSkipVerify is a flag that specifies if we should validate the
+		// server's TLS certificate.
+		InsecureSkipVerify bool
 		// Skip creating APIs if they already exist
 		SkipExisting bool
 	}
@@ -39,6 +42,7 @@ func (p *DashboardPublisher) enforceOrgIDForPolicies(pols *[]objects.Policy) {
 
 func (p *DashboardPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
@@ -53,6 +57,7 @@ func (p *DashboardPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) erro
 
 func (p *DashboardPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
@@ -67,7 +72,7 @@ func (p *DashboardPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) erro
 
 func (p *DashboardPublisher) SyncAPIs(apiDefs []objects.DBApiDefinition) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
-	c.SkipExisting = p.ClientOptions.SkipExisting
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}
@@ -101,6 +106,7 @@ func (p *DashboardPublisher) Name() string {
 
 func (p *DashboardPublisher) CreatePolicies(pols *[]objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
@@ -115,6 +121,7 @@ func (p *DashboardPublisher) CreatePolicies(pols *[]objects.Policy) error {
 
 func (p *DashboardPublisher) UpdatePolicies(pols *[]objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	c.SkipExisting = p.ClientOptions.SkipExisting
 	if err != nil {
 		return err
@@ -129,7 +136,7 @@ func (p *DashboardPublisher) UpdatePolicies(pols *[]objects.Policy) error {
 
 func (p *DashboardPublisher) SyncPolicies(pols []objects.Policy) error {
 	c, err := dashboard.NewDashboardClient(p.Hostname, p.Secret, p.OrgOverride)
-	c.SkipExisting = p.ClientOptions.SkipExisting
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}

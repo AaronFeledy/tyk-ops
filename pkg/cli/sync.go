@@ -54,4 +54,5 @@ func init() {
 	syncCmd.Flags().Bool("test", false, "Use test publisher, output results to stdio")
 	syncCmd.Flags().StringSlice("policies", []string{}, "Specific Policies ids to sync")
 	syncCmd.Flags().StringSlice("apis", []string{}, "Specific Apis ids to sync")
+	syncCmd.Flags().BoolP("insecure", "", false, "Override TLS certificate validation")
 }

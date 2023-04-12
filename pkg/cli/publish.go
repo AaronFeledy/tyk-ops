@@ -53,4 +53,5 @@ func init() {
 	publishCmd.Flags().StringSlice("policies", []string{}, "Specific Policies ids to publish")
 	publishCmd.Flags().StringSlice("apis", []string{}, "Specific Apis ids to publish")
 	publishCmd.Flags().BoolP("skip-existing", "n", false, "Skip creating APIs if they already exist")
+	publishCmd.Flags().BoolP("insecure", "", false, "Override TLS certificate validation")
 }

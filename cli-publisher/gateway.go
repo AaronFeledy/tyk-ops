@@ -9,10 +9,17 @@ import (
 type GatewayPublisher struct {
 	Secret   string
 	Hostname string
+	// Additional options to pass to the gateway client
+	ClientOptions struct {
+		// InsecureSkipVerify is a flag that specifies if we should validate the
+		// server's TLS certificate.
+		InsecureSkipVerify bool
+	}
 }
 
 func (p *GatewayPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := gateway.NewGatewayClient(p.Hostname, p.Secret)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}
@@ -22,6 +29,7 @@ func (p *GatewayPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error 
 
 func (p *GatewayPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := gateway.NewGatewayClient(p.Hostname, p.Secret)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}
@@ -35,6 +43,7 @@ func (p *GatewayPublisher) Name() string {
 
 func (p *GatewayPublisher) Reload() error {
 	c, err := gateway.NewGatewayClient(p.Hostname, p.Secret)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}
@@ -44,6 +53,7 @@ func (p *GatewayPublisher) Reload() error {
 
 func (p *GatewayPublisher) SyncAPIs(apiDefs []objects.DBApiDefinition) error {
 	c, err := gateway.NewGatewayClient(p.Hostname, p.Secret)
+	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err
 	}

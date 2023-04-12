@@ -73,6 +73,7 @@ func getPublisher(cmd *cobra.Command, args []string) (tyk_vcs.Publisher, error) 
 			Hostname:    dbString,
 			OrgOverride: orgOverride,
 		}
+		newDashPublisher.ClientOptions.InsecureSkipVerify, _ = cmd.Flags().GetBool("insecure")
 		newDashPublisher.ClientOptions.SkipExisting, _ = cmd.Flags().GetBool("skip-existing")
 
 		return newDashPublisher, nil
@@ -98,6 +99,7 @@ func getPublisher(cmd *cobra.Command, args []string) (tyk_vcs.Publisher, error) 
 			Secret:   secret,
 			Hostname: gwString,
 		}
+		newGWPublisher.ClientOptions.InsecureSkipVerify, _ = cmd.Flags().GetBool("insecure")
 
 		isGateway = true
 		return newGWPublisher, nil

@@ -64,4 +64,5 @@ func init() {
 	updateCmd.Flags().Bool("test", false, "Use test publisher, output results to stdio")
 	updateCmd.Flags().StringSlice("policies", []string{}, "Specific Policies ids to update")
 	updateCmd.Flags().StringSlice("apis", []string{}, "Specific Apis ids to update")
+	updateCmd.Flags().BoolP("insecure", "", false, "Override TLS certificate validation")
 }
