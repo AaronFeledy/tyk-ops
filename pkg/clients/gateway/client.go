@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/clients/objects"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 
 	"encoding/json"
 
@@ -91,18 +92,21 @@ func (c *Client) FetchAPIs() ([]objects.DBApiDefinition, error) {
 	return retList, nil
 }
 
-func getAPIsIdentifiers(apiDefs *[]objects.DBApiDefinition) (map[string]*objects.DBApiDefinition, map[string]*objects.DBApiDefinition, map[string]*objects.DBApiDefinition) {
+func getAPIsIdentifiers(apiDefs *[]objects.DBApiDefinition) (map[string]*objects.DBApiDefinition, map[string]*objects.DBApiDefinition, map[string]*objects.DBApiDefinition, map[string]*objects.DBApiDefinition) {
 	apiids := make(map[string]*objects.DBApiDefinition)
+	ids := make(map[string]*objects.DBApiDefinition)
 	slugs := make(map[string]*objects.DBApiDefinition)
 	paths := make(map[string]*objects.DBApiDefinition)
 
-	for i, apiDef := range *apiDefs {
-		apiids[apiDef.APIID] = &(*apiDefs)[i]
-		slugs[apiDef.Slug] = &(*apiDefs)[i]
-		paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain] = &(*apiDefs)[i]
+	for i := range *apiDefs {
+		apiDef := (*apiDefs)[i]
+		apiids[apiDef.APIID] = &apiDef
+		ids[apiDef.Id.Hex()] = &apiDef
+		slugs[apiDef.Slug] = &apiDef
+		paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain] = &apiDef
 	}
 
-	return apiids, slugs, paths
+	return apiids, ids, slugs, paths
 }
 
 func (c *Client) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
@@ -111,20 +115,33 @@ func (c *Client) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 		return err
 	}
 
-	apiids, slugs, paths := getAPIsIdentifiers(&existingAPIs)
+	apiids, ids, slugs, paths := getAPIsIdentifiers(&existingAPIs)
 
+	var existsCount int64
 	for i := range *apiDefs {
 		apiDef := (*apiDefs)[i]
 		fmt.Printf("Creating API %v: %v\n", i, apiDef.Name)
+		var existsError error
 		if thisAPI, ok := apiids[apiDef.APIID]; ok && thisAPI != nil {
 			fmt.Println("Warning: API ID Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
+		} else if thisAPI, ok := ids[apiDef.Id.Hex()]; ok && thisAPI != nil {
+			fmt.Println("Warning: Object ID Exists")
+			existsError = UseUpdateError
 		} else if thisAPI, ok := slugs[apiDef.Slug]; ok && thisAPI != nil {
 			fmt.Println("Warning: Slug Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
 		} else if thisAPI, ok := paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain]; ok && thisAPI != nil {
 			fmt.Println("Warning: Listen Path Exists")
-			return UseUpdateError
+			existsError = UseUpdateError
+		}
+
+		if existsError != nil {
+			if c.SkipExisting {
+				existsCount++
+				continue
+			}
+			return existsError
 		}
 
 		data, err := json.Marshal(apiDef.APIDefinition)
@@ -171,6 +188,10 @@ func (c *Client) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 		fmt.Printf("--> Status: OK, ID:%v\n", apiDef.APIID)
 	}
 
+	if existsCount > 0 {
+		output.User.Println("%v APIs already exist and were skipped", existsCount)
+	}
+
 	return nil
 }
 
@@ -211,11 +232,32 @@ func (c *Client) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 		return err
 	}
 
-	apiids, slugs, paths := getAPIsIdentifiers(&existingAPIs)
+	apiids, ids, slugs, paths := getAPIsIdentifiers(&existingAPIs)
 
-	for i, apiDef := range *apiDefs {
+	for i := range *apiDefs {
+		apiDef := (*apiDefs)[i]
 		fmt.Printf("Updating API %v: %v\n", i, apiDef.Name)
-		if nil == apiids[apiDef.APIID] {
+		if thisAPI, ok := apiids[apiDef.APIID]; ok && thisAPI != nil {
+			apiDef.Id = thisAPI.Id
+		} else if thisAPI, ok := ids[apiDef.Id.Hex()]; ok && thisAPI != nil {
+			if apiDef.APIID == "" {
+				apiDef.APIID = thisAPI.APIID
+			}
+		} else if thisAPI, ok := slugs[apiDef.Slug]; ok && thisAPI != nil {
+			if apiDef.APIID == "" {
+				apiDef.APIID = thisAPI.APIID
+			}
+			if apiDef.Id == "" {
+				apiDef.Id = thisAPI.Id
+			}
+		} else if thisAPI, ok := paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain]; ok && thisAPI != nil {
+			if apiDef.APIID == "" {
+				apiDef.APIID = thisAPI.APIID
+			}
+			if apiDef.Id == "" {
+				apiDef.Id = thisAPI.Id
+			}
+		} else {
 			return UseCreateError
 		}
 
@@ -247,16 +289,17 @@ func (c *Client) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 		}
 
 		if uResp.StatusCode != 200 {
-			return fmt.Errorf("API Returned error: %v (code: %v)", uResp.String(), uResp.StatusCode)
+			return fmt.Errorf("API updating returned error: %v (code: %v)", uResp.String(), uResp.StatusCode)
 		}
 
 		// initiate a reload
 		go c.Reload()
 
 		// Add updated API to existing API list.
-		apiids[apiDef.APIID] = &(*apiDefs)[i]
-		slugs[apiDef.Slug] = &(*apiDefs)[i]
-		paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain] = &(*apiDefs)[i]
+		apiids[apiDef.APIID] = &apiDef
+		ids[apiDef.Id.Hex()] = &apiDef
+		slugs[apiDef.Slug] = &apiDef
+		paths[apiDef.Proxy.ListenPath+"-"+apiDef.Domain] = &apiDef
 
 		fmt.Printf("--> Status: OK, ID:%v\n", apiDef.APIID)
 	}
@@ -331,7 +374,6 @@ func (c *Client) SyncAPIs(apiDefs []objects.DBApiDefinition) error {
 
 	// Do the updates
 	if err := c.UpdateAPIs(&updateAPIs); err != nil {
-		fmt.Println("ERR:", err)
 		return err
 	}
 	for _, apiDef := range updateAPIs {

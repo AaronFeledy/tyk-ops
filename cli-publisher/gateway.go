@@ -32,7 +32,6 @@ func (p *GatewayPublisher) CreateAPIs(apiDefs *[]objects.DBApiDefinition) error 
 
 func (p *GatewayPublisher) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 	c, err := gateway.NewGatewayClient(p.Hostname, p.Secret)
-	c.SkipExisting = p.ClientOptions.SkipExisting
 	c.InsecureSkipVerify = p.ClientOptions.InsecureSkipVerify
 	if err != nil {
 		return err

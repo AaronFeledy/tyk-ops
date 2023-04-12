@@ -287,7 +287,7 @@ func (c *Client) UpdateAPIs(apiDefs *[]objects.DBApiDefinition) error {
 		}
 
 		if updateResp.StatusCode != 200 {
-			return fmt.Errorf("API Updating Returned error: %v", updateResp.String())
+			return fmt.Errorf("API updating returned error: %v", updateResp.String())
 		}
 
 		var status APIResponse
