@@ -137,7 +137,9 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 				if err != nil {
 					out.User.Debug(err.Error())
 				}
-				wrapCount = len(loginLink) / int(termSize.Width)
+				if termSize.Width > 0 {
+					wrapCount = len(loginLink) / int(termSize.Width)
+				}
 
 				// Clear the previous output
 				for w := 0; w < wrapCount; w++ {
@@ -148,7 +150,9 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 				out.User.Printf("%s%s", cliClearLine, loginLink)
 
 				// If the expires string is longer than the terminal width, print a newline so it doesn't wrap
-				trailingSpace = int(termSize.Width) - (len(loginLink) % int(termSize.Width))
+				if termSize.Width > 0 {
+					trailingSpace = int(termSize.Width) - (len(loginLink) % int(termSize.Width))
+				}
 				if len(expires) >= trailingSpace {
 					out.User.Printf("\n")
 					padding = ""
