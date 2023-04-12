@@ -17,14 +17,18 @@ var syncCmd = &cobra.Command{
 	update those that it can find and create those that are missing.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if Cfg.TargetEnv != nil {
+			url := Cfg.TargetEnv.Dashboard.Url
+			secret := Cfg.TargetEnv.Dashboard.Secret
 			serverType := viper.GetString("target-server.type")
 			if serverType == "gateway" {
-				viper.SetDefault("gateway", Cfg.TargetEnv.Gateway.Url)
-				viper.SetDefault("secret", Cfg.TargetEnv.Gateway.Secret)
-			} else {
-				// Default to dashboard
-				viper.SetDefault("dashboard", Cfg.TargetEnv.Dashboard.Url)
-				viper.SetDefault("secret", Cfg.TargetEnv.Dashboard.Secret)
+				url = Cfg.TargetEnv.Gateway.Url
+				secret = Cfg.TargetEnv.Gateway.Secret
+			}
+			if val, _ := cmd.Flags().GetString("gateway"); val == "" {
+				cmd.Flags().Lookup("gateway").Value.Set(url)
+			}
+			if val, _ := cmd.Flags().GetString("secret"); val == "" {
+				cmd.Flags().Lookup("secret").Value.Set(secret)
 			}
 		}
 		verificationError := verifyArguments(cmd)
