@@ -18,6 +18,8 @@ type Client struct {
 	// InsecureSkipVerify is a flag that specifies if we should validate the
 	// server's TLS certificate.
 	InsecureSkipVerify bool
+	// Skip creating APIs if they already exist
+	SkipExisting bool
 }
 
 const (

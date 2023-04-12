@@ -100,6 +100,7 @@ func getPublisher(cmd *cobra.Command, args []string) (tyk_vcs.Publisher, error) 
 			Hostname: gwString,
 		}
 		newGWPublisher.ClientOptions.InsecureSkipVerify, _ = cmd.Flags().GetBool("insecure")
+		newGWPublisher.ClientOptions.SkipExisting, _ = cmd.Flags().GetBool("skip-existing")
 
 		isGateway = true
 		return newGWPublisher, nil
