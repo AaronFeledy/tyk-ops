@@ -260,7 +260,7 @@ var dumpCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(dumpCmd)
+	rootCmd.AddCommand(dumpCmd)
 
 	dumpCmd.Flags().StringP("dashboard", "d", "", "Fully qualified dashboard target URL")
 	dumpCmd.Flags().StringP("key", "k", "", "Key file location for auth (optional)")

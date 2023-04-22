@@ -24,7 +24,7 @@ var loginCmd = &cobra.Command{
 	Use:     "login",
 	Short:   "Log in to the Tyk Dashboard",
 	Long:    "Generate a login link for the Tyk Dashboard and open it in your default browser.",
-	Example: RootCmd.Use + " login",
+	Example: rootCmd.Use + " login",
 	Args:    cobra.NoArgs,
 	Run:     cmdLogin,
 }
@@ -286,5 +286,5 @@ func openLink(cmd *cobra.Command, link string) chan bool {
 // init registers the `tykops login` CLI command
 func init() {
 	loginOpt()
-	RootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(loginCmd)
 }

@@ -18,13 +18,13 @@ var pushCmd = &cobra.Command{
 	Use:     "bundle:push bundle_zip",
 	Short:   "Pushes a middleware bundle to mserv",
 	Long:    "Uploads a bundle file created with tyk CLI to mserv",
-	Example: RootCmd.Use + "@dev bundle:push /path/to/bundle.zip",
+	Example: rootCmd.Use + "@dev bundle:push /path/to/bundle.zip",
 	Args:    cobra.ExactArgs(1),
 	Run:     pushBundle,
 }
 
 func init() {
-	RootCmd.AddCommand(pushCmd)
+	rootCmd.AddCommand(pushCmd)
 
 	pushCmd.Flags().BoolP("storeonly", "s", false, "Don't process, just store it")
 	pushCmd.Flags().StringP("apiid", "a", "", "Optional API ID")

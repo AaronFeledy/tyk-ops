@@ -21,7 +21,7 @@ var restCmd = &cobra.Command{
 	Use:     "rest [method] url",
 	Short:   "Make a REST request",
 	Long:    "Make a REST request to the specified URL. The method defaults to GET when not specified.",
-	Example: RootCmd.Use + " rest GET http://example.com/api/endpoint -H 'Accept:application/json,Accept-Encoding:gzip'",
+	Example: rootCmd.Use + " rest GET http://example.com/api/endpoint -H 'Accept:application/json,Accept-Encoding:gzip'",
 	Args:    cobra.MaximumNArgs(2),
 	Run:     cmdRest,
 }
@@ -179,5 +179,5 @@ func prepareResponse(cmd *cobra.Command, resp *resty.Response, outputObj *map[st
 // init allows us to set up our command before any other functions are called
 func init() {
 	restOpt()
-	RootCmd.AddCommand(restCmd)
+	rootCmd.AddCommand(restCmd)
 }

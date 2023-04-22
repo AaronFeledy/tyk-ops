@@ -60,7 +60,7 @@ var updateCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().StringP("gateway", "g", "", "Fully qualified gateway target URL")
 	updateCmd.Flags().StringP("dashboard", "d", "", "Fully qualified dashboard target URL")
 	updateCmd.Flags().StringP("key", "k", "", "Key file location for auth (optional)")

@@ -46,7 +46,7 @@ var publishCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(publishCmd)
+	rootCmd.AddCommand(publishCmd)
 
 	// Here you will define your flags and configuration settings.
 	publishCmd.Flags().StringP("gateway", "g", "", "Fully qualified gateway target URL")

@@ -48,7 +48,7 @@ var syncCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(syncCmd)
 
 	syncCmd.Flags().StringP("gateway", "g", "", "Fully qualified gateway target URL")
 	syncCmd.Flags().StringP("dashboard", "d", "", "Fully qualified dashboard target URL")

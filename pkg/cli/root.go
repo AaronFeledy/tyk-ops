@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -11,7 +13,7 @@ import (
 	"strings"
 )
 
-var RootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
 	Use:  "tykops",
 	Long: "A tool to manage syncing and deployments of Tyk Gateways and their middleware bundles.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -21,13 +23,34 @@ var RootCmd = &cobra.Command{
 	},
 }
 
+// Execute adds all child commands to the root command and sets flags appropriately.
+func Execute() {
+	rootCmd.SetOut(os.Stdout)
+
+	cc.Init(&cc.Config{
+		RootCmd:       rootCmd,
+		Headings:      cc.HiCyan + cc.Bold + cc.Underline,
+		Commands:      cc.HiYellow + cc.Bold,
+		CmdShortDescr: cc.HiBlue,
+		Example:       cc.HiGreen + cc.Italic,
+		ExecName:      cc.Bold,
+		Flags:         cc.HiMagenta + cc.Bold,
+		FlagsDescr:    cc.HiBlue,
+	})
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file")
-	RootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file")
+	rootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
 
-	_ = viper.BindPFlag("target", RootCmd.PersistentFlags().Lookup("target"))
+	_ = viper.BindPFlag("target", rootCmd.PersistentFlags().Lookup("target"))
 
 	// Support @ shorthand for target flag in commands (e.g. tykops @dev deploy)
 	args := os.Args
