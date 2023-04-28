@@ -39,10 +39,16 @@ var updateCmd = &cobra.Command{
 				urlFlag = "gateway"
 			}
 			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {
-				cmd.Flags().Lookup(urlFlag).Value.Set(url)
+				err := cmd.Flags().Lookup(urlFlag).Value.Set(url)
+				if err != nil {
+					cmd.PrintErrln("Error setting flag: " + err.Error())
+				}
 			}
 			if val, _ := cmd.Flags().GetString("secret"); val == "" {
-				cmd.Flags().Lookup("secret").Value.Set(secret)
+				err := cmd.Flags().Lookup("secret").Value.Set(secret)
+				if err != nil {
+					cmd.PrintErrln("Error setting flag: " + err.Error())
+				}
 			}
 		}
 		verificationError := verifyArguments(cmd)
