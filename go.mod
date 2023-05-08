@@ -3,8 +3,9 @@ module github.com/AaronFeledy/tyk-ops
 go 1.16
 
 require (
-	github.com/TykTechnologies/graphql-go-tools v1.6.2-0.20230320143102-7a16078ce517
-	github.com/TykTechnologies/tyk v1.9.2-0.20230324144826-c9898fdef7f4
+	github.com/TykTechnologies/graphql-go-tools v1.6.2-0.20230502085426-8383e403b64f
+	github.com/TykTechnologies/storage v1.0.2
+	github.com/TykTechnologies/tyk v1.9.2-0.20230508091715-84500cf67aa5
 	github.com/containerd/console v1.0.3
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/fatih/color v1.15.0
