@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	"github.com/fatih/color"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -39,7 +39,7 @@ func Execute() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		rootCmd.PrintErrln(color.RedString(err.Error()))
 		os.Exit(1)
 	}
 }

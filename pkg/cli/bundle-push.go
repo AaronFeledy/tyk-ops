@@ -18,9 +18,9 @@ var pushCmd = &cobra.Command{
 	Use:     "bundle:push bundle_zip",
 	Short:   "Pushes a middleware bundle to mserv",
 	Long:    "Uploads a bundle file created with tyk CLI to mserv",
-	Example: rootCmd.Use + "@dev bundle:push /path/to/bundle.zip",
+	Example: rootCmd.Use + " @dev bundle:push /path/to/bundle.zip",
 	Args:    cobra.ExactArgs(1),
-	Run:     pushBundle,
+	RunE:    pushBundle,
 }
 
 func init() {
@@ -38,30 +38,35 @@ func init() {
 
 }
 
-func pushBundle(cmd *cobra.Command, args []string) {
+// pushBundle is a function which implements the `tykops bundle:push` CLI command to handle uploading a bundle to mserv.
+func pushBundle(cmd *cobra.Command, args []string) error {
 	if Cfg.TargetEnv != nil {
 		viper.SetDefault("mserv-url", Cfg.TargetEnv.Mserv.Url)
 		viper.SetDefault("mserv-secret", Cfg.TargetEnv.Mserv.Secret)
 	}
 
-	file, err := os.Open(args[0])
+	fileName := args[0]
+
+	fileParts := strings.Split(fileName, ".")
+	ext := fileParts[len(fileParts)-1]
+	if ext != "zip" {
+		return fmt.Errorf("file type must be zip: '%v' given", ext)
+	}
+
+	file, err := os.Open(fileName)
 	if err != nil {
-		cmd.PrintErr(fmt.Sprintln("Couldn't open the bundle file"))
-		cmd.PrintErr(fmt.Sprintln(err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("couldn't read the bundle file at '%s': %s", fileName, err.Error())
 	}
 
 	endpoint := viper.GetString("mserv-url")
 	if endpoint == "" {
 		dbUrl, _ := cmd.Flags().GetString("dashboard")
 		if dbUrl == "" {
-			cmd.PrintErr(fmt.Sprintln(cmd.Use, "requires an endpoint or dashboard URL to be set"))
-			os.Exit(1)
+			return fmt.Errorf("'%s' requires an endpoint or dashboard URL to be set", cmd.Use)
 		} else {
 			urlObj, err := url.Parse(dbUrl)
 			if err != nil {
-				cmd.PrintErr(fmt.Sprintln("Couldn't parse dashboard URL"))
-				os.Exit(1)
+				return fmt.Errorf("couldn't parse dashboard URL")
 			}
 			urlObj.Path = path.Join(urlObj.Path, "mserv")
 			endpoint = urlObj.String()
@@ -71,25 +76,16 @@ func pushBundle(cmd *cobra.Command, args []string) {
 	secret := viper.GetString("mserv-secret")
 
 	if secret == "" {
-		cmd.PrintErr(fmt.Sprintln("Please set the --token flag to your mserv access token"))
-		os.Exit(1)
+		return fmt.Errorf("please set the --token flag to your mserv access token")
 	}
 
 	client, err := mserv.NewMservClient(endpoint, secret)
 	if err != nil {
-		cmd.PrintErr(fmt.Sprintln(err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("failed to init mserv client: %s", err.Error())
 	}
 
 	apiid, _ := cmd.Flags().GetString("apiid")
 	storeOnly, _ := cmd.Flags().GetBool("storeonly")
-
-	fileParts := strings.Split(file.Name(), ".")
-	ext := fileParts[len(fileParts)-1]
-	if ext != "zip" {
-		cmd.PrintErr(fmt.Sprintf("File type must be zip: %v\n", ext))
-		os.Exit(1)
-	}
 
 	cmd.PrintErrln("")
 	fileInfo, err := file.Stat()
@@ -108,17 +104,17 @@ func pushBundle(cmd *cobra.Command, args []string) {
 	data, err := client.BundlePush(params)
 	if err != nil {
 		_ = bar.Exit()
-		cmd.PrintErr(fmt.Sprintln("Failed to push bundle to mserv"))
-		cmd.PrintErr(fmt.Sprintln(err.Error()))
-		os.Exit(1)
+		return err
 	}
 	err = bar.Finish()
 	err = bar.Clear()
 	if err != nil {
-		cmd.PrintErr(fmt.Sprintln(err.Error()))
-		os.Exit(1)
+		_ = bar.Exit()
+		cmd.PrintErrln()
 	}
 
 	successMsg := "Bundle successfully pushed to mserv with ID: "
 	out.DataWithFlair(data.Id).Pre(successMsg).Println()
+
+	return nil
 }

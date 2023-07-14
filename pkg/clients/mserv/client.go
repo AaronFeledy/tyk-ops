@@ -105,23 +105,26 @@ func (c *Client) BundlePush(params *BundlePushParams) (*BundleData, error) {
 		return nil, err
 	}
 
-	if pushResp.StatusCode != 200 {
-		return nil, fmt.Errorf("mserv api returned error: %v (code: %v)", pushResp.Error, pushResp.StatusCode)
-	}
-
 	var payload Payload
 	if err := pushResp.JSON(&payload); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("mserv client could not decode api response: %s", err.Error())
 	}
 
-	if payload.Status != "ok" {
-		return nil, fmt.Errorf("mserv api request completed, but with error: %v", payload.Error)
+	// Handle an error response from the server
+	if !pushResp.Ok {
+		var responseMessage string
+		if len(payload.Error) > 0 {
+			responseMessage = payload.Error
+		} else {
+			responseMessage = pushResp.Error.Error()
+		}
+		return nil, fmt.Errorf("mserv client recieved an error code from the server (code: %v): %s", pushResp.StatusCode, responseMessage)
 	}
 
 	// Payload must be a map[string]interface{}
 	payloadData, ok := payload.Payload.(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("mserv api returned unexpected payload: %v", payload.Payload)
+		return nil, fmt.Errorf("mserv client recieved an unexpected api response: %v", payload.Payload)
 	}
 
 	// Payload must contain a "BundleID" key
