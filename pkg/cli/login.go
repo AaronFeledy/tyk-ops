@@ -45,24 +45,24 @@ func loginOpt() {
 // cmdLogin is a function which implements the `tykops login` CLI command
 func cmdLogin(cmd *cobra.Command, args []string) {
 	// A target is required
-	if Cfg.TargetEnv == nil {
+	if cfg.TargetEnv == nil {
 		out.User.Fatal("No target environment specified")
 	}
 	// Update the target environment config with the flags
 	if secret, _ := cmd.Flags().GetString("secret"); secret != "" {
-		Cfg.TargetEnv.Dashboard.Secret = secret
+		cfg.TargetEnv.Dashboard.Secret = secret
 	}
 
 	allowInsecure := false
 	if allowInsecure, _ = cmd.Flags().GetBool("insecure"); !allowInsecure {
-		allowInsecure = Cfg.TargetEnv.Dashboard.AllowInsecure
+		allowInsecure = cfg.TargetEnv.Dashboard.AllowInsecure
 	}
 
 	dashAdmin := ops.DashboardAdmin{
 		Server: ops.Server{
 			Type:          "dashboard",
-			Url:           Cfg.TargetEnv.Dashboard.Url,
-			Secret:        Cfg.TargetEnv.Dashboard.Secret,
+			Url:           cfg.TargetEnv.Dashboard.Url,
+			Secret:        cfg.TargetEnv.Dashboard.Secret,
 			AllowInsecure: allowInsecure,
 		},
 		Client: resty.New(),

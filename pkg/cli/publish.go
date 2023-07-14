@@ -14,14 +14,14 @@ var publishCmd = &cobra.Command{
 	Long: `Publish API definitions from a Git repo to a gateway or dashboard, this
 	will not update existing APIs, and if it detects a collision, will stop.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if Cfg.TargetEnv != nil {
-			url := Cfg.TargetEnv.Dashboard.Url
-			secret := Cfg.TargetEnv.Dashboard.Secret
+		if cfg.TargetEnv != nil {
+			url := cfg.TargetEnv.Dashboard.Url
+			secret := cfg.TargetEnv.Dashboard.Secret
 			urlFlag := "dashboard"
 			serverType := viper.GetString("target-server.type")
 			if serverType == "gateway" {
-				url = Cfg.TargetEnv.Gateway.Url
-				secret = Cfg.TargetEnv.Gateway.Secret
+				url = cfg.TargetEnv.Gateway.Url
+				secret = cfg.TargetEnv.Gateway.Secret
 				urlFlag = "gateway"
 			}
 			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {

@@ -16,14 +16,14 @@ var syncCmd = &cobra.Command{
 	Sync will delete any objects in the dashboard or gateway that it cannot find in the github repo,
 	update those that it can find and create those that are missing.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if Cfg.TargetEnv != nil {
-			url := Cfg.TargetEnv.Dashboard.Url
-			secret := Cfg.TargetEnv.Dashboard.Secret
+		if cfg.TargetEnv != nil {
+			url := cfg.TargetEnv.Dashboard.Url
+			secret := cfg.TargetEnv.Dashboard.Secret
 			urlFlag := "dashboard"
 			serverType := viper.GetString("target-server.type")
 			if serverType == "gateway" {
-				url = Cfg.TargetEnv.Gateway.Url
-				secret = Cfg.TargetEnv.Gateway.Secret
+				url = cfg.TargetEnv.Gateway.Url
+				secret = cfg.TargetEnv.Gateway.Secret
 				urlFlag = "gateway"
 			}
 			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {

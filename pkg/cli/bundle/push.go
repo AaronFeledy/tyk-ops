@@ -1,4 +1,4 @@
-package cli
+package bundle
 
 import (
 	"fmt"
@@ -15,16 +15,18 @@ import (
 
 // pushCmd represents the push command
 var pushCmd = &cobra.Command{
-	Use:     "bundle:push bundle_zip",
+	Use:     "push bundle_zip",
 	Short:   "Pushes a middleware bundle to mserv",
 	Long:    "Uploads a bundle file created with tyk CLI to mserv",
-	Example: rootCmd.Use + " @dev bundle:push /path/to/bundle.zip",
 	Args:    cobra.ExactArgs(1),
 	RunE:    pushBundle,
+	Example: "/path/to/bundle.zip",
 }
 
 func init() {
-	rootCmd.AddCommand(pushCmd)
+	pushCmd.Example = strings.Join([]string{
+		rootCmd.Name(), "@dev", BundleCmd.Name(), pushCmd.Name(), " /path/to/bundle.zip",
+	}, " ")
 
 	pushCmd.Flags().BoolP("storeonly", "s", false, "Don't process, just store it")
 	pushCmd.Flags().StringP("apiid", "a", "", "Optional API ID")
@@ -40,9 +42,9 @@ func init() {
 
 // pushBundle is a function which implements the `tykops bundle:push` CLI command to handle uploading a bundle to mserv.
 func pushBundle(cmd *cobra.Command, args []string) error {
-	if Cfg.TargetEnv != nil {
-		viper.SetDefault("mserv-url", Cfg.TargetEnv.Mserv.Url)
-		viper.SetDefault("mserv-secret", Cfg.TargetEnv.Mserv.Secret)
+	if cfg.TargetEnv != nil {
+		viper.SetDefault("mserv-url", cfg.TargetEnv.Mserv.Url)
+		viper.SetDefault("mserv-secret", cfg.TargetEnv.Mserv.Secret)
 	}
 
 	fileName := args[0]

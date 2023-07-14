@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"github.com/AaronFeledy/tyk-ops/pkg/cli/bundle"
+	"github.com/AaronFeledy/tyk-ops/pkg/cli_util"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/fatih/color"
@@ -12,6 +14,8 @@ import (
 	"path"
 	"strings"
 )
+
+var cfg = cli_util.Config
 
 var rootCmd = &cobra.Command{
 	Use:  "tykops",
@@ -46,6 +50,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.AddCommand(bundle.BundleCmd)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file")
 	rootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
@@ -140,26 +145,14 @@ func initConfig() {
 		}
 
 		// Load the config into the global variable
-		Cfg.Environments = &ops.Environments
-		if err := viper.Unmarshal(&Cfg); err != nil {
+		cfg.Environments = &ops.Environments
+		if err := viper.Unmarshal(&cfg); err != nil {
 			out.User.Errorln(err.Error())
 			return
 		}
 		// Add shorthand for the target environment
 		if targetEnv {
-			Cfg.TargetEnv = ops.Environments[target]
+			cfg.TargetEnv = ops.Environments[target]
 		}
 	}
-}
-
-// Config is the configuration for the TykOps client.
-type Config struct {
-	// Environments is a map of available environments keyed by name.
-	Environments *map[string]*ops.Environment `mapstructure:"environments"`
-	// EnvironmentDefault is a map of available environments keyed by name.
-	EnvironmentDefault string `mapstructure:"environment_default,omitempty"`
-	// Target is the name of the target environment.
-	Target string `mapstructure:"target"`
-	// TargetEnv is the target environment to act on.
-	TargetEnv *ops.Environment `mapstructure:"-"` // This is not a config value, it's a convenience for the target environment
 }

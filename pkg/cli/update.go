@@ -28,14 +28,14 @@ var updateCmd = &cobra.Command{
 	Long: `Update will attempt to identify matching APIs or Policies in the target, and update those APIs
 	It will not create new ones, to do this use publish or sync.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if Cfg.TargetEnv != nil {
-			url := Cfg.TargetEnv.Dashboard.Url
-			secret := Cfg.TargetEnv.Dashboard.Secret
+		if cfg.TargetEnv != nil {
+			url := cfg.TargetEnv.Dashboard.Url
+			secret := cfg.TargetEnv.Dashboard.Secret
 			urlFlag := "dashboard"
 			serverType := viper.GetString("target-server.type")
 			if serverType == "gateway" {
-				url = Cfg.TargetEnv.Gateway.Url
-				secret = Cfg.TargetEnv.Gateway.Secret
+				url = cfg.TargetEnv.Gateway.Url
+				secret = cfg.TargetEnv.Gateway.Secret
 				urlFlag = "gateway"
 			}
 			if val, _ := cmd.Flags().GetString(urlFlag); val == "" {

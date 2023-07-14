@@ -8,7 +8,6 @@ import (
 const VERSION = "0.0.1"
 
 var (
-	Cfg        Config
 	cfgFile    string
 	labelColor = color.New(color.FgMagenta).SprintFunc()
 )
