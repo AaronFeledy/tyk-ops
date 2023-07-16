@@ -86,6 +86,9 @@ func pushBundle(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to init mserv client: %s", err.Error())
 	}
 
+	// Errors beyond this point are unlikely to be tykops syntax so don't display help/usage on error.
+	cmd.SilenceUsage = true
+
 	apiid, _ := cmd.Flags().GetString("apiid")
 	storeOnly, _ := cmd.Flags().GetBool("storeonly")
 
