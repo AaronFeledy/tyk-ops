@@ -58,6 +58,9 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 		allowInsecure = cfg.TargetEnv.Dashboard.AllowInsecure
 	}
 
+	// Errors beyond this point are unlikely to be tykops syntax so don't display help/usage on error.
+	cmd.SilenceUsage = true
+
 	dashAdmin := ops.DashboardAdmin{
 		Server: ops.Server{
 			Type:          "dashboard",
