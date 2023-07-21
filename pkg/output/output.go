@@ -58,11 +58,15 @@ func DataWithFlair(data string) *FlairedData {
 
 func PrettyString(str string) {
 	var prettyJSON bytes.Buffer
+	str = strings.TrimSpace(str)
 	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err == nil {
-		Data.Println(prettyJSON.String())
+		Data.Print(prettyJSON.String())
 	} else {
-		Data.Println(str)
+		// Trim the string to remove any leading or trailing whitespace
+		str = strings.TrimSpace(str)
+		Data.Print(str)
 	}
+	User.Printf("\n")
 }
 
 // FlairedData is a struct that can be used to print data with surrounding flair.

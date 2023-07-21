@@ -2,10 +2,11 @@ package cli
 
 import (
 	"github.com/AaronFeledy/tyk-ops/pkg/cli/bundle"
+	"github.com/AaronFeledy/tyk-ops/pkg/cli/rest"
 	"github.com/AaronFeledy/tyk-ops/pkg/cli_util"
+	rest_client "github.com/AaronFeledy/tyk-ops/pkg/clients/rest"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
 	out "github.com/AaronFeledy/tyk-ops/pkg/output"
-	"github.com/fatih/color"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -25,6 +26,7 @@ var rootCmd = &cobra.Command{
 			out.User.Errorln(err)
 		}
 	},
+	SilenceErrors: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,7 +45,7 @@ func Execute() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		rootCmd.PrintErrln(color.RedString(err.Error()))
+		out.User.Errorln(err.Error())
 		os.Exit(1)
 	}
 }
@@ -51,6 +53,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(bundle.BundleCmd)
+	rootCmd.AddCommand(rest.RestCmd)
+
+	rest_client.InitUserAgent(VERSION)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file")
 	rootCmd.PersistentFlags().String("target", "", "A target environment to use as defined in your configuration file. You may use @target_name as shorthand for this flag.")
