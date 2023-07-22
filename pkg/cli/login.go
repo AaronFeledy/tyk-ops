@@ -26,7 +26,7 @@ var loginCmd = &cobra.Command{
 	Long:    "Generate a login link for the Tyk Dashboard and open it in your default browser.",
 	Example: rootCmd.Use + " login",
 	Args:    cobra.NoArgs,
-	Run:     cmdLogin,
+	RunE:    cmdLogin,
 }
 
 // loginOpt defines the flags for the `tykops login` CLI command
@@ -43,10 +43,10 @@ func loginOpt() {
 }
 
 // cmdLogin is a function which implements the `tykops login` CLI command
-func cmdLogin(cmd *cobra.Command, args []string) {
+func cmdLogin(cmd *cobra.Command, args []string) error {
 	// A target is required
 	if cfg.TargetEnv == nil {
-		out.User.Fatal("No target environment specified")
+		return fmt.Errorf("%s", "No target environment specified")
 	}
 	// Update the target environment config with the flags
 	if secret, _ := cmd.Flags().GetString("secret"); secret != "" {
@@ -75,24 +75,20 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 	if orgId, _ = cmd.Flags().GetString("org"); orgId == "" {
 		orgs, err := dashAdmin.GetOrganizations()
 		if err != nil {
-			out.User.Error(err.Error())
-			os.Exit(1)
+			return fmt.Errorf("%s", err.Error())
 		}
 		if len(*orgs) == 0 {
-			out.User.Error("no organizations found")
-			os.Exit(1)
+			return fmt.Errorf("%s", "no organizations found")
 		}
 		if len(*orgs) > 1 {
-			out.User.Error("multiple organizations found, please specify one with the -o flag")
-			os.Exit(1)
+			return fmt.Errorf("%s", "multiple organizations found, please specify one with the -o flag")
 		}
 		orgId = (*orgs)[0].Id
 	}
 
 	loginLink, err := dashAdmin.SSO("dashboard", orgId, "", "")
 	if err != nil {
-		out.User.Error(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("%s", err.Error())
 	}
 
 	// Print the link
@@ -105,7 +101,7 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 	interactive, _ := cmd.Flags().GetBool("interactive")
 	if !interactive && !isatty.IsTerminal(os.Stdout.Fd()) {
 		out.User.Printf("\n")
-		return
+		return nil
 	} else {
 		// Block input from echoing to the terminal during the countdown
 		current := console.Current()
@@ -225,6 +221,7 @@ func cmdLogin(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
+	return nil
 }
 
 // readKey opens a channel that sends any key when it is pressed
@@ -232,14 +229,14 @@ func readKey(input chan rune) {
 	defer close(input)
 	err := keyboard.Open()
 	if err != nil {
-		out.User.Fatal(err)
+		out.User.Debug(err)
 	}
 	defer keyboard.Close()
 
 	for {
 		char, _, err := keyboard.GetSingleKey()
 		if err != nil {
-			out.User.Fatal(err)
+			out.User.Debug(err)
 		}
 		input <- char
 	}
