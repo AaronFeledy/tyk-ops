@@ -65,6 +65,9 @@ func init() {
 	// Support @ shorthand for target flag in commands (e.g. tykops @dev deploy)
 	args := os.Args
 	for i, arg := range args {
+		if len(arg) == 0 {
+			continue
+		}
 		if arg[:1] == "@" {
 			segments := strings.Split(arg[1:], ".")
 			switch len(segments) {
