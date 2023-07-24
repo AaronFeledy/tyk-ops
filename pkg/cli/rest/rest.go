@@ -30,7 +30,7 @@ var RestCmd = &cobra.Command{
 	RunE:    runRest,
 }
 
-// restOpt defines the flags for the `tykops login` CLI command
+// restOpt defines the flags for this command
 func restOpt() {
 	// Flags that apply to this command
 	RestCmd.Flags().BoolP("insecure", "k", false, "override TLS certificate validation")
@@ -92,7 +92,7 @@ func runRest(cmd *cobra.Command, args []string) error {
 		req.SetBody(body)
 	}
 
-	// Errors beyond this point are unlikely to be tykops syntax so don't display help/usage on error.
+	// Errors beyond this point are unlikely to be related to tykops syntax.
 	cmd.SilenceUsage = true
 
 	resp, err := req.Execute(method, url)
