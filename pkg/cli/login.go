@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
-	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/containerd/console"
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
@@ -44,6 +44,8 @@ func loginOpt() {
 
 // cmdLogin is a function which implements the `tykops login` CLI command
 func cmdLogin(cmd *cobra.Command, args []string) error {
+	out := output.NewFromCmd(cmd)
+
 	// A target is required
 	if cfg.TargetEnv == nil {
 		return fmt.Errorf("%s", "No target environment specified")
@@ -100,7 +102,7 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 	// Scripts should just dump the link and move on.
 	interactive, _ := cmd.Flags().GetBool("interactive")
 	if !interactive && !isatty.IsTerminal(os.Stdout.Fd()) {
-		out.User.Printf("\n")
+		out.Msgf("\n")
 		return nil
 	} else {
 		// Block input from echoing to the terminal during the countdown
@@ -108,12 +110,12 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 		defer func(current console.Console) {
 			err := current.Reset()
 			if err != nil {
-				out.User.Debug(err.Error())
+				output.User.Debug(err.Error())
 			}
 		}(current)
 		err := current.DisableEcho()
 		if err != nil {
-			out.User.Debug(err.Error())
+			output.User.Debug(err.Error())
 		}
 
 		// Capture keystrokes so we can exit countdown on key press
@@ -134,7 +136,7 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 				// Determine whether the link will wrap to the next line
 				termSize, err := current.Size()
 				if err != nil {
-					out.User.Debug(err.Error())
+					output.User.Debug(err.Error())
 				}
 				if termSize.Width > 0 {
 					wrapCount = len(loginLink) / int(termSize.Width)
@@ -142,35 +144,35 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 
 				// Clear the previous output
 				for w := 0; w < wrapCount; w++ {
-					out.User.Printf("%s\033[1A", cliClearLine)
+					out.Msgf("%s\033[1A", cliClearLine)
 				}
 
 				// Print the link
-				out.User.Printf("%s%s", cliClearLine, loginLink)
+				out.Msgf("%s%s", cliClearLine, loginLink)
 
 				// If the expires string is longer than the terminal width, print a newline so it doesn't wrap
 				if termSize.Width > 0 {
 					trailingSpace = int(termSize.Width) - (len(loginLink) % int(termSize.Width))
 				}
 				if len(expires) >= trailingSpace {
-					out.User.Printf("\n")
+					out.Msgf("\n")
 					padding = ""
 					wrapCount++
 				}
 			}
 			if i == 0 {
-				expires = fmt.Sprintf("[ LINK EXPIRED ]")
-				out.User.Printf("%s", cliClearLine)
+				expires = "[ LINK EXPIRED ]"
+				out.Msgf("%s", cliClearLine)
 				// Clear the number of lines equal to wrapCount
 				for w := 0; w <= wrapCount; w++ {
-					out.User.Printf("\033[1A%s", cliClearLine)
+					out.Msgf("\033[1A%s", cliClearLine)
 				}
 
 				// Print the expired link in strikethrough
-				out.User.Printf("\033[9m%s\033[0m", loginLink)
+				out.Msgf("\033[9m%s\033[0m", loginLink)
 
 				if len(expires) >= trailingSpace {
-					out.User.Printf("\n")
+					out.Msgf("\n")
 				}
 			}
 			expires = padding + expires
@@ -186,36 +188,36 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 			default:
 				expiresColored = color.RedString(expires)
 			}
-			out.User.Printf("%s", expiresColored)
+			out.Msgf("%s", expiresColored)
 
 			select {
 			case <-time.After(time.Second * time.Duration(i*2000)): // Immediately break when i==0
-				out.User.Printf("\n")
+				out.Msgf("\n")
 				break CountDown
 			case opened := <-openLink(cmd, loginLink): // Try to open the link in the browser automatically
 				if opened {
 					// Back up the cursor to the beginning of expiry countdown
-					out.User.Printf("\033[%dD", len(expires))
+					out.Msgf("\033[%dD", len(expires))
 					// Clear everything after the cursor
-					out.User.Printf("\033[J")
+					out.Msgf("\033[J")
 					// Add a final line break if we don't already have one
 					if len(expires) < trailingSpace {
-						out.User.Printf("\n")
+						out.Msgf("\n")
 					}
 					break CountDown
 				}
 			case <-time.After(time.Second): // Update every second
 				// Back up the cursor to the beginning of expiry countdown
-				out.User.Printf("\033[%dD", len(expires))
+				out.Msgf("\033[%dD", len(expires))
 				continue
 			case <-input: // End countdown when a key is pressed
 				// Back up the cursor to the beginning of expiry countdown
-				out.User.Printf("\033[%dD", len(expires))
+				out.Msgf("\033[%dD", len(expires))
 				// Clear everything after the cursor
-				out.User.Printf("\033[J")
+				out.Msgf("\033[J")
 				// Add a final line break if we don't already have one
 				if len(expires) < trailingSpace {
-					out.User.Printf("\n")
+					out.Msgf("\n")
 				}
 				break CountDown
 			}
@@ -229,14 +231,14 @@ func readKey(input chan rune) {
 	defer close(input)
 	err := keyboard.Open()
 	if err != nil {
-		out.User.Debug(err)
+		output.User.Debug(err)
 	}
 	defer keyboard.Close()
 
 	for {
 		char, _, err := keyboard.GetSingleKey()
 		if err != nil {
-			out.User.Debug(err)
+			output.User.Debug(err)
 		}
 		input <- char
 	}
@@ -275,7 +277,7 @@ func openLink(cmd *cobra.Command, link string) chan bool {
 	go func() {
 		err := execCmd.Start()
 		if err != nil {
-			out.User.Debug("error opening link: ", err)
+			output.User.Debug("error opening link: ", err)
 			return
 		}
 		c <- true

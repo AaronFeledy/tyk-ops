@@ -6,7 +6,7 @@ import (
 	"github.com/AaronFeledy/tyk-ops/pkg/cli_util"
 	rest_client "github.com/AaronFeledy/tyk-ops/pkg/clients/rest"
 	"github.com/AaronFeledy/tyk-ops/pkg/ops"
-	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 	Long: "A tool to manage syncing and deployments of Tyk Gateways and their middleware bundles.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cmd.Help(); err != nil {
-			out.User.Errorln(err)
+			output.User.Errorln(err)
 		}
 	},
 	SilenceErrors: true,
@@ -31,7 +31,6 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
-	rootCmd.SetOut(os.Stdout)
 
 	cc.Init(&cc.Config{
 		RootCmd:       rootCmd,
@@ -45,7 +44,7 @@ func Execute() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		out.User.Errorln(err.Error())
+		output.User.Errorln(err.Error())
 		os.Exit(1)
 	}
 }
@@ -109,7 +108,7 @@ func initConfig() {
 		// Walk up the directory tree looking for a config file
 		wd, err := os.Getwd()
 		if err != nil {
-			out.User.Errorln("Couldn't get current working directory")
+			output.User.Errorln("Couldn't get current working directory")
 			os.Exit(1)
 		}
 		for wd != "/" {
@@ -120,7 +119,7 @@ func initConfig() {
 		// Config file may also be in the home directory
 		home, err := homedir.Dir()
 		if err != nil {
-			out.User.Errorln(err)
+			output.User.Errorln(err)
 		}
 		viper.AddConfigPath(home)
 	}
@@ -130,7 +129,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		out.User.Debugln("Using config file:", viper.ConfigFileUsed())
+		output.User.Debugln("Using config file:", viper.ConfigFileUsed())
 
 		// Check for target environment in config
 		var targetEnv bool
@@ -145,17 +144,17 @@ func initConfig() {
 
 		// Don't continue if the target environment is not found in the config
 		if viper.IsSet("environments." + target) {
-			out.User.Debugln("Using target environment '" + target + "'")
+			output.User.Debugln("Using target environment '" + target + "'")
 			targetEnv = true
 		} else {
-			out.User.Errorln("Target environment '" + target + "' not found in " + viper.ConfigFileUsed())
+			output.User.Errorln("Target environment '" + target + "' not found in " + viper.ConfigFileUsed())
 			os.Exit(1)
 		}
 
 		// Load the config into the global variable
 		cfg.Environments = &ops.Environments
 		if err := viper.Unmarshal(&cfg); err != nil {
-			out.User.Errorln(err.Error())
+			output.User.Errorln(err.Error())
 			return
 		}
 		// Add shorthand for the target environment

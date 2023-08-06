@@ -3,7 +3,7 @@ package bundle
 import (
 	"fmt"
 	"github.com/AaronFeledy/tyk-ops/pkg/clients/mserv"
-	out "github.com/AaronFeledy/tyk-ops/pkg/output"
+	"github.com/AaronFeledy/tyk-ops/pkg/output"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,6 +42,8 @@ func init() {
 
 // pushBundle is a function which implements the `tykops bundle:push` CLI command to handle uploading a bundle to mserv.
 func pushBundle(cmd *cobra.Command, args []string) error {
+	out := output.NewFromCmd(cmd)
+
 	if cfg.TargetEnv != nil {
 		viper.SetDefault("mserv-url", cfg.TargetEnv.Mserv.Url)
 		viper.SetDefault("mserv-secret", cfg.TargetEnv.Mserv.Secret)

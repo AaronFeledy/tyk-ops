@@ -47,6 +47,7 @@ func restOpt() {
 }
 
 func runRest(cmd *cobra.Command, args []string) error {
+	out := output.NewFromCmd(cmd)
 	var method string
 	var url string
 
@@ -105,8 +106,7 @@ func runRest(cmd *cobra.Command, args []string) error {
 		// Display the response body if there is one
 		if len(resp.String()) > 0 {
 			output.User.Error(err.Error())
-			output.PrettyString(resp.String())
-			output.User.Printf("")
+			out.PrettyString(resp.String())
 		}
 		return err
 	}
@@ -164,7 +164,7 @@ func runRest(cmd *cobra.Command, args []string) error {
 	}
 
 	// Pretty printed output is easier to read
-	output.PrettyString(outString)
+	out.PrettyString(outString)
 
 	return nil
 }

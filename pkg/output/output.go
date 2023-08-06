@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"strings"
@@ -46,31 +47,96 @@ func init() {
 	log.SetLevel(logLevel)
 }
 
+// Output is a struct that can be used to print data and flair to stdout and stderr.
+type Output struct {
+	// stdout is the writer to use for stdout. nil will use os.Stdout
+	stdout io.Writer
+	// stderr is the writer to use for stderr. nil will use os.Stderr
+	stderr io.Writer
+}
+
+// NewOutput creates a new output object. If stdout or stderr are nil, os.Stdout or os.Stderr will be used.
+func NewOutput(out io.Writer, err io.Writer) *Output {
+	if out == nil {
+		out = outWriter
+	}
+	if err == nil {
+		err = errWriter
+	}
+	return &Output{
+		stdout: out,
+		stderr: err,
+	}
+}
+
+// NewFromCmd returns an Output object that uses the stdout and stderr of the supplied command.
+func NewFromCmd(cmd *cobra.Command) *Output {
+	out := cmd.OutOrStdout()
+	err := cmd.OutOrStderr()
+	return NewOutput(out, err)
+}
+
+// Dataln prints the data to the stdout writer followed by a line break to the stderr writer. This allows the data to be
+// piped to other commands without including the line break that would be printed to the console.
+func (o *Output) Dataln(data string) {
+	outMsg := &FlairedData{
+		data:   data,
+		output: o,
+	}
+	outMsg.Post("\n").Print()
+}
+
+// Dataf uses printf style formatting to print the data to the stdout writer.
+func (o *Output) Dataf(format string, args ...interface{}) {
+	_, err := fmt.Fprintf(o.stdout, format, args...)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		fmt.Printf(format, args...)
+	}
+}
+
+// Msgln prints the message to the stderr writer followed by a line break.
+func (o *Output) Msgln(msg string) {
+	o.Msgf("%s\n", msg)
+}
+
+// Msgf uses printf style formatting to print the message to the stderr writer.
+func (o *Output) Msgf(format string, args ...interface{}) {
+	_, err := fmt.Fprintf(o.stderr, format, args...)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, format, args...)
+	}
+}
+
 // DataWithFlair Prints only the data to stdout so it can be piped to other commands without including
 // the surrounding text.
 // Use Pre() and Post() methods to add surrounding text that will be displayed to the user but will
 // not be included in the piped output.
-func DataWithFlair(data string) *FlairedData {
+func (o *Output) DataWithFlair(data string) *FlairedData {
 	return &FlairedData{
-		data: data,
+		data:   data,
+		output: o,
 	}
 }
 
-func PrettyString(str string) {
+// PrettyString prints a string as pretty JSON to the stdout writer.
+func (o *Output) PrettyString(str string) {
 	var prettyJSON bytes.Buffer
 	str = strings.TrimSpace(str)
 	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err == nil {
-		Data.Print(prettyJSON.String())
+		o.Dataf("%s", prettyJSON.String())
 	} else {
 		// Trim the string to remove any leading or trailing whitespace
 		str = strings.TrimSpace(str)
-		Data.Print(str)
+		o.Dataf("%s", str)
 	}
-	User.Printf("\n")
+	o.Msgf("\n")
 }
 
 // FlairedData is a struct that can be used to print data with surrounding flair.
 type FlairedData struct {
+	output    *Output
 	data      string
 	flairPre  string
 	flairPost string
@@ -90,9 +156,14 @@ func (f *FlairedData) Post(flair string) *FlairedData {
 
 // Print will output the flaired message
 func (f *FlairedData) Print() {
+	if f.output == nil {
+		f.output = NewOutput(Data.Out, User.Out)
+	}
+	out := f.output
+
 	// Print only the data to stdout so it can be piped to other commands without including the surrounding text.
-	User.Printf("%s", f.flairPre)
-	Data.Printf("%s", f.data)
+	out.Msgf("%s", f.flairPre)
+	out.Dataf("%s", f.data)
 
 	// Rewrite the previous message to stderr so that it is still shown to the user if it's been captured.
 	preSuffix := ""
@@ -109,19 +180,19 @@ func (f *FlairedData) Print() {
 	runes := bytes.Runes([]byte(f.flairPre))
 	f.flairPre = f.flairPre + preSuffix
 	if len(runes) > 0 && runes[len(runes)-1] == '\n' {
-		User.Printf("\r%s", f.data)
+		out.Msgf("\r%s", f.data)
 	} else {
 		// When data and prefix are on the same line, we need to reprint both
-		User.Printf("\r%s%s", f.flairPre, f.data)
+		out.Msgf("\r%s%s", f.flairPre, f.data)
 	}
 
-	User.Printf("%s", f.flairPost)
+	out.Msgf("%s", f.flairPost)
 }
 
 // Println will output the flaired message followed by a line break
 func (f *FlairedData) Println() {
 	f.Print()
-	User.Println()
+	f.output.Msgln("")
 }
 
 // PlainFormatter defines a output formatter with no special frills
