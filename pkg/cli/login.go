@@ -110,12 +110,12 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 		defer func(current console.Console) {
 			err := current.Reset()
 			if err != nil {
-				output.User.Debug(err.Error())
+				out.Debug(err.Error())
 			}
 		}(current)
 		err := current.DisableEcho()
 		if err != nil {
-			output.User.Debug(err.Error())
+			out.Debug(err.Error())
 		}
 
 		// Capture keystrokes so we can exit countdown on key press
@@ -136,7 +136,7 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 				// Determine whether the link will wrap to the next line
 				termSize, err := current.Size()
 				if err != nil {
-					output.User.Debug(err.Error())
+					out.Debug(err.Error())
 				}
 				if termSize.Width > 0 {
 					wrapCount = len(loginLink) / int(termSize.Width)
@@ -231,14 +231,14 @@ func readKey(input chan rune) {
 	defer close(input)
 	err := keyboard.Open()
 	if err != nil {
-		output.User.Debug(err)
+		output.Debug(err.Error())
 	}
 	defer keyboard.Close()
 
 	for {
 		char, _, err := keyboard.GetSingleKey()
 		if err != nil {
-			output.User.Debug(err)
+			output.Debug(err.Error())
 		}
 		input <- char
 	}
@@ -277,7 +277,7 @@ func openLink(cmd *cobra.Command, link string) chan bool {
 	go func() {
 		err := execCmd.Start()
 		if err != nil {
-			output.User.Debug("error opening link: ", err)
+			output.Debug("error opening link: " + err.Error())
 			return
 		}
 		c <- true

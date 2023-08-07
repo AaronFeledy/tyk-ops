@@ -24,6 +24,8 @@ var (
 	User = log.New()
 	// UserFormatter is the formatter used for User output
 	UserFormatter = new(PlainFormatter)
+	// DebugOutput is a global output object that can be used to print debug messages
+	DebugOutput = NewOutput(outWriter, errWriter)
 )
 
 // init sets up loggers
@@ -132,6 +134,18 @@ func (o *Output) PrettyString(str string) {
 		o.Dataf("%s", str)
 	}
 	o.Msgf("\n")
+}
+
+// Debug prints the message to the stderr writer if debug mode is enabled.
+func (o *Output) Debug(msg string) {
+	Debug(msg)
+}
+
+// Debug prints the message to the stderr writer if debug mode is enabled.
+func Debug(msg string) {
+	if Data.Level == log.DebugLevel {
+		DebugOutput.Msgf("%s\n", msg)
+	}
 }
 
 // FlairedData is a struct that can be used to print data with surrounding flair.
