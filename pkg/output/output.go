@@ -51,10 +51,10 @@ func init() {
 
 // Output is a struct that can be used to print data and flair to stdout and stderr.
 type Output struct {
-	// stdout is the writer to use for stdout. nil will use os.Stdout
-	stdout io.Writer
-	// stderr is the writer to use for stderr. nil will use os.Stderr
-	stderr io.Writer
+	// outWriter is the writer to use for stdout. nil will use os.Stdout
+	outWriter io.Writer
+	// errWriter is the writer to use for stderr. nil will use os.Stderr
+	errWriter io.Writer
 }
 
 // NewOutput creates a new output object. If stdout or stderr are nil, os.Stdout or os.Stderr will be used.
@@ -66,8 +66,8 @@ func NewOutput(out io.Writer, err io.Writer) *Output {
 		err = errWriter
 	}
 	return &Output{
-		stdout: out,
-		stderr: err,
+		outWriter: out,
+		errWriter: err,
 	}
 }
 
@@ -90,21 +90,21 @@ func (o *Output) Dataln(data string) {
 
 // Dataf uses printf style formatting to print the data to the stdout writer.
 func (o *Output) Dataf(format string, args ...interface{}) {
-	_, err := fmt.Fprintf(o.stdout, format, args...)
+	_, err := fmt.Fprintf(o.outWriter, format, args...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Printf(format, args...)
 	}
 }
 
-// Msgln prints the message to the stderr writer followed by a line break.
-func (o *Output) Msgln(msg string) {
-	o.Msgf("%s\n", msg)
+// Infoln prints an informational message to the stderr writer followed by a line break.
+func (o *Output) Infoln(msg string) {
+	o.Infof("%s\n", msg)
 }
 
-// Msgf uses printf style formatting to print the message to the stderr writer.
-func (o *Output) Msgf(format string, args ...interface{}) {
-	_, err := fmt.Fprintf(o.stderr, format, args...)
+// Infof uses printf style formatting to print an informational message to the stderr writer.
+func (o *Output) Infof(format string, args ...interface{}) {
+	_, err := fmt.Fprintf(o.errWriter, format, args...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintf(os.Stderr, format, args...)
@@ -133,7 +133,7 @@ func (o *Output) PrettyString(str string) {
 		str = strings.TrimSpace(str)
 		o.Dataf("%s", str)
 	}
-	o.Msgf("\n")
+	o.Infof("\n")
 }
 
 // Debug prints the message to the stderr writer if debug mode is enabled.
@@ -144,7 +144,7 @@ func (o *Output) Debug(msg string) {
 // Debug prints the message to the stderr writer if debug mode is enabled.
 func Debug(msg string) {
 	if Data.Level == log.DebugLevel {
-		DebugOutput.Msgf("%s\n", msg)
+		DebugOutput.Infof("%s\n", msg)
 	}
 }
 
@@ -176,7 +176,7 @@ func (f *FlairedData) Print() {
 	out := f.output
 
 	// Print only the data to stdout so it can be piped to other commands without including the surrounding text.
-	out.Msgf("%s", f.flairPre)
+	out.Infof("%s", f.flairPre)
 	out.Dataf("%s", f.data)
 
 	// Rewrite the previous message to stderr so that it is still shown to the user if it's been captured.
@@ -194,19 +194,19 @@ func (f *FlairedData) Print() {
 	runes := bytes.Runes([]byte(f.flairPre))
 	f.flairPre = f.flairPre + preSuffix
 	if len(runes) > 0 && runes[len(runes)-1] == '\n' {
-		out.Msgf("\r%s", f.data)
+		out.Infof("\r%s", f.data)
 	} else {
 		// When data and prefix are on the same line, we need to reprint both
-		out.Msgf("\r%s%s", f.flairPre, f.data)
+		out.Infof("\r%s%s", f.flairPre, f.data)
 	}
 
-	out.Msgf("%s", f.flairPost)
+	out.Infof("%s", f.flairPost)
 }
 
 // Println will output the flaired message followed by a line break
 func (f *FlairedData) Println() {
 	f.Print()
-	f.output.Msgln("")
+	f.output.Infoln("")
 }
 
 // PlainFormatter defines a output formatter with no special frills

@@ -102,7 +102,7 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 	// Scripts should just dump the link and move on.
 	interactive, _ := cmd.Flags().GetBool("interactive")
 	if !interactive && !isatty.IsTerminal(os.Stdout.Fd()) {
-		out.Msgf("\n")
+		out.Infof("\n")
 		return nil
 	} else {
 		// Block input from echoing to the terminal during the countdown
@@ -144,35 +144,35 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 
 				// Clear the previous output
 				for w := 0; w < wrapCount; w++ {
-					out.Msgf("%s\033[1A", cliClearLine)
+					out.Infof("%s\033[1A", cliClearLine)
 				}
 
 				// Print the link
-				out.Msgf("%s%s", cliClearLine, loginLink)
+				out.Infof("%s%s", cliClearLine, loginLink)
 
 				// If the expires string is longer than the terminal width, print a newline so it doesn't wrap
 				if termSize.Width > 0 {
 					trailingSpace = int(termSize.Width) - (len(loginLink) % int(termSize.Width))
 				}
 				if len(expires) >= trailingSpace {
-					out.Msgf("\n")
+					out.Infof("\n")
 					padding = ""
 					wrapCount++
 				}
 			}
 			if i == 0 {
 				expires = "[ LINK EXPIRED ]"
-				out.Msgf("%s", cliClearLine)
+				out.Infof("%s", cliClearLine)
 				// Clear the number of lines equal to wrapCount
 				for w := 0; w <= wrapCount; w++ {
-					out.Msgf("\033[1A%s", cliClearLine)
+					out.Infof("\033[1A%s", cliClearLine)
 				}
 
 				// Print the expired link in strikethrough
-				out.Msgf("\033[9m%s\033[0m", loginLink)
+				out.Infof("\033[9m%s\033[0m", loginLink)
 
 				if len(expires) >= trailingSpace {
-					out.Msgf("\n")
+					out.Infof("\n")
 				}
 			}
 			expires = padding + expires
@@ -188,36 +188,36 @@ func cmdLogin(cmd *cobra.Command, args []string) error {
 			default:
 				expiresColored = color.RedString(expires)
 			}
-			out.Msgf("%s", expiresColored)
+			out.Infof("%s", expiresColored)
 
 			select {
 			case <-time.After(time.Second * time.Duration(i*2000)): // Immediately break when i==0
-				out.Msgf("\n")
+				out.Infof("\n")
 				break CountDown
 			case opened := <-openLink(cmd, loginLink): // Try to open the link in the browser automatically
 				if opened {
 					// Back up the cursor to the beginning of expiry countdown
-					out.Msgf("\033[%dD", len(expires))
+					out.Infof("\033[%dD", len(expires))
 					// Clear everything after the cursor
-					out.Msgf("\033[J")
+					out.Infof("\033[J")
 					// Add a final line break if we don't already have one
 					if len(expires) < trailingSpace {
-						out.Msgf("\n")
+						out.Infof("\n")
 					}
 					break CountDown
 				}
 			case <-time.After(time.Second): // Update every second
 				// Back up the cursor to the beginning of expiry countdown
-				out.Msgf("\033[%dD", len(expires))
+				out.Infof("\033[%dD", len(expires))
 				continue
 			case <-input: // End countdown when a key is pressed
 				// Back up the cursor to the beginning of expiry countdown
-				out.Msgf("\033[%dD", len(expires))
+				out.Infof("\033[%dD", len(expires))
 				// Clear everything after the cursor
-				out.Msgf("\033[J")
+				out.Infof("\033[J")
 				// Add a final line break if we don't already have one
 				if len(expires) < trailingSpace {
-					out.Msgf("\n")
+					out.Infof("\n")
 				}
 				break CountDown
 			}
