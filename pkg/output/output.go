@@ -74,7 +74,7 @@ func NewOutput(out io.Writer, err io.Writer) *Output {
 // NewFromCmd returns an Output object that uses the stdout and stderr of the supplied command.
 func NewFromCmd(cmd *cobra.Command) *Output {
 	out := cmd.OutOrStdout()
-	err := cmd.OutOrStderr()
+	err := cmd.ErrOrStderr()
 	return NewOutput(out, err)
 }
 

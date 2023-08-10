@@ -31,6 +31,8 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
+	// Cobra defaults to printing everything to stderr, so we need to override that
+	rootCmd.SetOut(os.Stdout)
 
 	cc.Init(&cc.Config{
 		RootCmd:       rootCmd,
